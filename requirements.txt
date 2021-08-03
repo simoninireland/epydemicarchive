@@ -1,0 +1,13 @@
+typing_extensions; python_version < '3.8'
+networkx >= 2.4
+epydemic >= 1.5.1
+pyyaml
+pyopenssl
+flask
+flask-bootstrap
+flask-wtf
+email_validator
+flask-sqlalchemy
+flask-migrate
+flask-login
+flask-httpauth

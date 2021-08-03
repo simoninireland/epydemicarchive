@@ -1,0 +1,50 @@
+{% extends 'base.tmpl' %}
+
+{% block app_content %}
+  <h1>Network {{ network.id }}</h1>
+
+  <p>
+    Uploaded by {{ network.owner.email }} at {{ network.uploaded.isoformat(timespec='seconds') + 'Z' }}
+  </p>
+
+  {% with is_owner = (current_user.email == network.owner.email) %}
+    <form action="" method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <p>
+	{{ form.title.label }}<br>
+	{% if is_owner %}
+	  {{ form.title(size=32) }}
+	{% else %}
+	  {{ form.title(size=32, readonly="readonly") }}
+	{% endif %}
+      </p>
+      <p>
+	{{ form.description.label }}<br>
+	{% if is_owner %}
+	  {{ form.description(size=128) }}
+	{% else %}
+	  {{ form.description(size=128, readonly="readonly") }}
+	{% endif %}
+      </p>
+      <p>
+	{{ form.tags.label }}<br>
+	{% if is_owner %}
+	  {{ form.tags(size=32) }}
+	{% else %}
+	  {{ form.tags(size=32, readonly="readonly") }}
+	{% endif %}
+      </p>
+      <p>
+	{% if is_owner %}
+	  {{ form.submit() }} &nbsp;
+	  {{ form.cancel() }} &nbsp;
+	  {{ form.download() }} &nbsp;
+	  <span style="color: red;">{{ form.delete() }}</span>
+	{% else %}
+	  {{ form.cancel() }} &nbsp;
+	  {{ form.download() }} &nbsp;
+	{% endif %}
+      </p>
+    </form>
+  {% endwith %}
+{% endblock %}

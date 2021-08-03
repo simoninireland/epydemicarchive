@@ -1,0 +1,168 @@
+# Archive data model
+#
+# Copyright (C) 2021 Simon Dobson
+#
+# This file is part of epydemicarchive, a server for complex network archives.
+#
+# epydemicerchive is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# epydemicarchive is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
+
+import os
+import re
+import uuid
+from datetime import datetime
+from flask import current_app
+from flask_login import current_user
+from epydemicarchive import db
+
+
+tags = db.Table('tags',
+                db.Column('network', db.ForeignKey('network.id'), primary_key=True),
+                db.Column('tag', db.ForeignKey('tag.id'), primary_key=True))
+
+
+class Network(db.Model):
+    '''Network data model. This records the metadata about a network held
+    in the archive.
+    '''
+    # The regexp for all the acceptable extensions for network files
+    NetworkFileExtensions = re.compile('.*\.al.gz$')
+
+    # Location information
+    id = db.Column(db.String(64), primary_key=True)
+    filename = db.Column(db.String(256))             # relative to ARCHIVE_DIR
+
+    # Lifecycle
+    uploaded = db.Column(db.DateTime)
+    available = db.Column(db.Boolean)
+
+    # Metadata
+    title = db.Column(db.String(256))
+    description = db.Column(db.String(1024))
+    tags = db.relationship('Tag', secondary=tags, lazy='subquery',
+                           backref=db.backref('networks', lazy=True))
+    user_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
+    owner = db.relationship('User', backref=db.backref('networks', lazy=True))
+
+    def tagnames(self):
+        '''Return a list of tag names.
+
+        :returns: the network's tags'''
+        return [tag.name for tag in self.tags]
+
+    def network_filename(self):
+        '''Return the file in the archive holding the network.
+
+        :returns: the filename'''
+        return os.path.join(current_app.config['ARCHIVE_DIR'],
+                            self.filename)
+
+
+    # ---------- Static helper methods ----------
+
+    @staticmethod
+    def from_uuid(id):
+        '''Return the network with the given UUID.
+
+        :param id: the UUId
+        :returns: the network or None'''
+        return Network.query.filter_by(id=id).first()
+
+    @staticmethod
+    def is_acceptable_file(filename):
+        '''Test whether the given filename has an acceptable extension.
+        This is a sub-set of the file types handled by NetworkX.
+
+        :param filename: the filename
+        :returns: the network model's acceptable extension, or None'''
+        m = Network.NetworkFileExtensions.match(filename)
+        print(filename, m)
+        return None if m is None else m[0][1:]
+
+    @staticmethod
+    def create_model(filename, data, title, desc, tags):
+        '''Create a new network object.
+
+        :param filename: the filename of the uploaded network
+        :param data: the uploaded network data stream
+        :param title: the network title
+        :param desc: the network description
+        :param tags: a list of tags for the network
+        :returns: the uuid assigned to the network'''
+
+        # create a UUID for this new network
+        id = str(uuid.uuid4())
+
+        # construct a filename for the uploaded network, maintaining
+        # the original extension
+        ext = Network.is_acceptable_file(filename)
+        basename = f'{id}.{ext}'
+        full = os.path.join(current_app.config['ARCHIVE_DIR'],
+                            basename)
+
+        # save the uploaded network into the archive directory
+        data.save(full)
+
+        # make sure all the tags exist in the tags table
+        for tag in tags:
+            print(f'New tag {tag}')
+            Tag.create_tag(tag)
+        alltags = set(tags)
+
+        # create the network
+        now = datetime.utcnow()
+        n = Network(id=id,
+                    filename=basename,
+                    owner=current_user,
+                    uploaded=now,
+                    available=False,
+                    title=title,
+                    description=desc,
+                    tags=Tag.query.filter(Tag.name.in_(alltags)).all())
+        db.session.add(n)
+
+        # return the UUID genereated for the network in the archive
+        return id
+
+    @staticmethod
+    def delete_network(n):
+        '''Delete the network from the archive.
+
+        :param n: the network'''
+
+        # delete network file
+        os.remove(n.network_filename())
+
+        # delete record
+        db.session.delete(n)
+
+
+class Tag(db.Model):
+    '''A tag on a network. Tags are used for simple classification. Some
+    are user-supplied; others are synthesised by the network analysers.
+    '''
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(32), index=True)
+
+    @staticmethod
+    def create_tag(tag):
+        '''Ensure that a tag exists in the tags table. Tags are
+        always normalised to be lower case.
+
+        :param tag: the tag'''
+        tag = tag.lower()
+        if Tag.query.filter_by(name=tag).first() is None:
+            # no such tag, add it to the table
+            t = Tag(name=tag)
+            db.session.add(t)

@@ -1,0 +1,82 @@
+#+title: epydemicarchive
+
+* epydemicarchive: A collection of re-usable, large, complex networks :PROJECT:
+
+** Release planning
+
+*** Release 0.2.1
+
+**** Coding
+
+     - [ ] [[https://pythonhosted.org/Flask-Principal/][RBAC]]
+     - [ ] [[https://flask-limiter.readthedocs.io/en/stable/][Rate limits]]
+     - [ ] [[https://flask-email.readthedocs.io/en/latest/][Email notifications]] and callbacks
+     - [ ] Simple admin interface
+
+
+*** Release 0.1.1
+
+**** Coding [2/6]
+
+     - [ ] Initial generation
+     - [ ] Initial API
+     - [X] Initial architecture
+     - [ ] Public key checks
+     - [X] Database schema
+     - [ ] Metadata generation
+
+
+** Architecture
+
+   The epydemic archive is a codebase for /creating/ archives, rather
+   than /being/ an archive itself. It provides a web server interface
+   to submit and retrieve sample networks generated using `epydemic`'s
+   generators or some other code, together with code to verify that a
+   submitted network corresponds to the topology and other features it
+   purports.
+
+   A network is provided as an adjacency list file, probably
+   compressed, which is one of the formats that `networkx` can export
+   natively. Associated with the file are the parameters used to
+   create it, which correspond to those provided to the generator as
+   experimental parameters.
+
+   When submitted the server loads the network and runs a sequence of
+   checks on it. These can be set per-topology and generate metadata
+   including:
+
+   - Distance of the real degree distribution from the canonical
+     distribution expected for this topology. (Initially use
+     [[https://en.wikipedia.org/wiki/Jensen%E2%80%93Shannon_divergence][Jensen Shannon distance]] as the go-to distance metric for pretty
+     much anything.) The canonical distribution can be extracted from
+     known generating functions, at least for ER, BA, and PLC
+     topologies.
+   - P(k, k') assortativity cite:UnreasonableEffectiveness
+   - Clustering coefficient
+
+   The idea is to have these tests configured for the archive
+   depending on how the submission process is done: a "trusting"
+   archive that only accepts submissions from known sources is
+   basically just adding metadata rather than looking for spoofing.
+
+   Write the data into a [[https://docs.python.org/3/library/sqlite3.html][SQLite database]] that can be queried
+   effectively. Store the networks using [[https://docs.python.org/3/library/uuid.html][UUID]]-based filenames.
+
+   Submission needs to use by TLS and public keys to make sure. [[https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https][See
+   here]] for a discussion of setting up a secure Python server. It can
+   then [[https://docs.python.org/3/library/hashlib.html][generate SHA256 hashes]] for the network.
+
+   Retrieval returns a network and a YAML file describing it.
+
+   A client within `epydemic` can be used to query the archive, to
+   retrieve networks with the desired properties. There's an issue
+   about what to do with "approximate" queries, and also what to do
+   about querying for metadata properties: a network with a high
+   clustering coefficient shouldn't come back by accident when asking
+   for just "a" network, for example.
+
+
+** Resources
+
+   - [[https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-i-hello-world][The Flask mega-tutorial]] is a comprehensive guide to developing
+     web applications using Python's Flask framework.

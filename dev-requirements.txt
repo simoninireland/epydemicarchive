@@ -1,0 +1,14 @@
+wheel
+tox
+nose
+coverage
+flake8
+pylint
+rope
+sphinx
+doc8
+twine
+matplotlib
+seaborn
+mypy
+httpie
