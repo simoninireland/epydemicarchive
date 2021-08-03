@@ -3,6 +3,7 @@ networkx >= 2.4
 epydemic >= 1.5.1
 pyyaml
 pyopenssl
+python-dotenv
 flask
 flask-bootstrap
 flask-wtf

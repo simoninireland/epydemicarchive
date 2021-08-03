@@ -63,7 +63,6 @@ SOURCES_TESTS = \
 	test/app.py
 TESTSUITE = test
 FLASK_TEST_APP_INSTANCE = test.app:app
-MIGRATIONS_DIR = migrations
 
 SOURCES_DOC_CONF = doc/conf.py
 SOURCES_DOC_BUILD_DIR = doc/_build
@@ -82,8 +81,10 @@ SOURCES_GENERATED = \
 	MANIFEST \
 	setup.py
 
-# Default databases
-NETWORKS_DB = 'epydemicarchive/networks-archive.db'
+# Default database, migrations, and file archive
+NETWORKS_DB = ea.db
+ARCHIVE_DIR = archive.d
+MIGRATIONS_DIR = migrations
 
 # Distribution files
 DIST_SDIST = dist/$(PACKAGENAME)-$(VERSION).tar.gz
@@ -147,7 +148,7 @@ live:
 
 # Run a live server after reseting its environment
 newlive:
-	$(RM) $(NETWORKS_DB) $(MIGRATIONS_DIR)
+	$(RM) $(NETWORKS_DB) $(MIGRATIONS_DIR) $(ARCHIVE_DIR)
 	$(ACTIVATE) && FLASK_APP=$(FLASK_TEST_APP_INSTANCE) $(FLASK) db init
 	$(ACTIVATE) && FLASK_APP=$(FLASK_TEST_APP_INSTANCE) $(FLASK) db migrate -m "initial setup"
 	$(ACTIVATE) && FLASK_APP=$(FLASK_TEST_APP_INSTANCE) $(FLASK) db upgrade
