@@ -44,6 +44,12 @@ SOURCES_AUTH_BLUEPRINT = \
 	epydemicarchive/auth/routes.py \
 	epydemicarchive/auth/templates/login.tmpl \
 	epydemicarchive/auth/templates/newuser.tmpl
+SOURCES_USER_BLUEPRINT = \
+	epydemicarchive/user/__init__.py \
+	epydemicarchive/user/models.py \
+	epydemicarchive/user/forms.py \
+	epydemicarchive/user/routes.py \
+	epydemicarchive/user/templates/profile_edit.tmpl
 SOURCES_ARCHIVE_BLUEPRINT = \
 	epydemicarchive/archive/__init__.py \
 	epydemicarchive/archive/models.py \
