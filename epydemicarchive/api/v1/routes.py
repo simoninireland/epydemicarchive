@@ -24,7 +24,7 @@ from epydemicarchive.api.v1 import api, __version__
 from epydemicarchive.archive.models import Tag, Network
 
 
-def error(status, message):
+def error(status, message=None):
     '''Create a standard-format error message.
 
     :param status: the HTTP status code
@@ -39,6 +39,14 @@ def error(status, message):
     res = jsonify(payload)
     res.status_code = status
     return res
+
+
+@tokenauth.error_handler
+def token_error(status):
+    '''Return an API error message for authorisation failure.
+
+    :param status: the HTTP status code'''
+    return error(status)
 
 
 @api.route('/tags', methods=['GET'])
