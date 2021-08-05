@@ -18,12 +18,14 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 import os
+import tempfile
 from dotenv import load_dotenv
 from flask import Flask, Blueprint, redirect, render_template, url_for
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
+from flask_httpauth import HTTPBasicAuth, HTTPTokenAuth
 
 
 # Load environment from .env
@@ -36,11 +38,11 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'A secret'
 
     # Database connection and tweaks
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'networks-archive.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + tempfile.mkstemp(suffix='.db')
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Directory for storing networks
-    ARCHIVE_DIR = os.environ.get('ARCHIVE_DIR') or os.path.join(os.path.abspath(os.path.dirname(__file__)), 'archive.d')
+    ARCHIVE_DIR = os.environ.get('ARCHIVE_DIR') or tempfile.mkdtemp()
 
 
 # Instanciate all the extensions
@@ -49,6 +51,8 @@ db = SQLAlchemy()
 migrate = Migrate()
 login = LoginManager()
 login.login_view='auth.login'
+basicauth = HTTPBasicAuth()
+tokenauth = HTTPTokenAuth()
 
 
 # Make sure the archive directory exists
@@ -80,10 +84,12 @@ def create(config=Config):
     app.register_blueprint(main)
     from epydemicarchive.auth import auth
     app.register_blueprint(auth, url_prefix='/auth')
+    from epydemicarchive.user import user
+    app.register_blueprint(user, url_prefix='/user')
     from epydemicarchive.archive import archive
     app.register_blueprint(archive, url_prefix='/archive')
-    from epydemicarchive.api import api
-    app.register_blueprint(api, url_prefix='/api/v1')
+    from epydemicarchive.api.v1 import api as api_v1
+    app.register_blueprint(api_v1, url_prefix='/api/v1')
 
     # custom error handlers
     def page_not_found(e):
