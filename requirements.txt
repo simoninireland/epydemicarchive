@@ -1,6 +1,6 @@
 typing_extensions; python_version < '3.8'
 networkx >= 2.4
-epydemic >= 1.5.1
+numpy >= 1.18
 pyyaml
 pyopenssl
 python-dotenv

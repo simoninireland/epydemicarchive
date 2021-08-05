@@ -30,11 +30,18 @@ VERSION = 0.1.1
 SOURCES_SETUP_IN = setup.py.in
 SOURCES_LIBRARY = \
 	epydemicarchive/__init__.py \
-	epidemicarchive/templates/404.tmpl
+	epydemicarchive/templates/404.tmpl
+SOURCES_MIGRATIONS = \
+	migrations/README \
+	migrations/alembic.ini \
+	migrations/env.py \
+	migrations/script.py.mako
+SOURCES_DB_MIGRATIONS = \
+	migrations/versions/af4c5eff0608_initial_models.py
 SOURCES_MAIN_BLUEPRINT = \
 	epydemicarchive/main/__init__.py \
 	epydemicarchive/main/routes.py \
-	epydemicarchive/main/templates/main.tmpl \
+	epydemicarchive/main/templates/base.tmpl \
 	epydemicarchive/main/templates/page.tmpl \
 	epydemicarchive/main/pages/index.html
 SOURCES_AUTH_BLUEPRINT = \
@@ -55,16 +62,21 @@ SOURCES_ARCHIVE_BLUEPRINT = \
 	epydemicarchive/archive/models.py \
 	epydemicarchive/archive/forms.py \
 	epydemicarchive/archive/routes.py \
-	epydemicarchive/archive/templates/upload.py \
-	epydemicarchive/archive/templates/browse.py
+	epydemicarchive/archive/templates/upload.tmpl \
+	epydemicarchive/archive/templates/edit.tmpl \
+	epydemicarchive/archive/templates/browse.tmpl
 SOURCES_API_BLUEPRINT =\
-	epydemicarchive/api/__init__.py \
-	epydemicarchive/api/routes.py
+	epydemicarchive/api/v1/__init__.py \
+	epydemicarchive/api/v1/routes.py
 SOURCES_CODE = \
 	$(SOURCES_LIBRARY) \
+	$(SOURCES_MIGRATIONS) \
+	$(SOURCE_DB_MIGRATIONS) \
 	$(SOURCES_MAIN_BLUEPRINT) \
 	$(SOURCES_AUTH_BLUEPRINT) \
+	$(SOURCES_USER_BLUEPRINT) \
 	$(SOURCES_ARCHIVE_BLUEPRINT) \
+	$(SOURCES_API_BLUEPRINT)
 SOURCES_TESTS = \
 	test/app.py
 TESTSUITE = test
@@ -92,6 +104,11 @@ NETWORKS_DB = ea.db
 ARCHIVE_DIR = archive.d
 MIGRATIONS_DIR = migrations
 
+# Docker configuration
+DOCKERFILE = Dockerfile
+DOCKER_IMAGE = ea
+DOCKER_BOOT = boot.sh
+
 # Distribution files
 DIST_SDIST = dist/$(PACKAGENAME)-$(VERSION).tar.gz
 DIST_WHEEL = dist/$(PACKAGENAME)-$(VERSION)-py3-none-any.whl
@@ -109,6 +126,7 @@ GPG = gpg
 GIT = git
 VIRTUALENV = $(PYTHON) -m venv
 ACTIVATE = . $(VENV)/bin/activate
+DOCKER = docker
 TR = tr
 CAT = cat
 SED = sed
@@ -203,6 +221,14 @@ commit: check-local-repo-clean
 check-local-repo-clean:
 	if [ "$(GIT_DIRTY)" ]; then echo "Uncommitted files: $(GIT_DIRTY)"; exit 1; fi
 
+# Build a docker image
+docker: $(SOURCES_CODE) Makefile $(DOCKERFILE)
+	$(DOCKER) build -t $(DOCKER_IMAGE):latest .
+
+# Run the server in a Docker container
+dockerlive:
+	$(DOCKER) run --name ea -p 8000:5000 --rm $(DOCKER_IMAGE):latest
+
 # Clean up the distribution build
 clean:
 	$(RM) $(SOURCES_GENERATED) $(SOURCES_DIST_DIR) epydemic.egg-info dist $(SOURCES_DOC_BUILD_DIR) $(SOURCES_DOC_ZIP) dist build
@@ -244,6 +270,7 @@ Available targets:
    make wheel	     create binary (wheel) distribution
    make upload       upload distribution to PyPi
    make commit       tag current version and and push to master repo
+   make docker       build a Docker image
    make clean        clean-up the build
    make reallyclean  clean up the virtualenv as well
 
