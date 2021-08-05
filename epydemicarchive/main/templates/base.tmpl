@@ -53,6 +53,7 @@
 	    </a>
 	    <ul class="dropdown-menu">
 	      {% if current_user.is_authenticated %}
+		<li><a href="{{ url_for('user.edit_profile', email=current_user.email) }}">Profile</a></li>
 		<li><a href="{{ url_for('auth.logout') }}">Sign out</a></li>
 	      {% else %}
 		<li><a href="{{ url_for('auth.login') }}">Sign in</a></li>
