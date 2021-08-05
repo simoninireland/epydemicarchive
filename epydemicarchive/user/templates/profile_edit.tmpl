@@ -24,5 +24,12 @@
     <p>
       {{ form.submit() }} &nbsp; {{ form.cancel() }}
     </p>
+    <hr>
+    <p>
+      Your API key is {{ user.api_key }}
+      (expires {{ user.api_key_expires.isoformat(timespec='seconds') + 'Z' }}).
+    </p>
+    <p>
+      {{ form.api_key() }}
   </form>
 {% endblock %}

@@ -23,9 +23,10 @@ from wtforms import StringField, TextAreaField, SubmitField
 
 class EditProfile(FlaskForm):
 
-    name = StringField()
-    affiliation = StringField()
-    url = StringField()
-    bio = TextAreaField()
+    name = StringField('Name (optional)')
+    affiliation = StringField('University or affiliation (optional)')
+    url = StringField('Home page (optional)')
+    bio = TextAreaField('(Biography (optional)')
     submit = SubmitField()
     cancel = SubmitField()
+    api_key = SubmitField('Request a new API key')

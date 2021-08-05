@@ -50,7 +50,7 @@ class Profile(db.Model):
 
     @staticmethod
     def create_profile(u):
-        '''Create a blank profile fir the given user.
+        '''Create a blank profile for the given user.
 
         :param u: the user
         :returns: the profile'''

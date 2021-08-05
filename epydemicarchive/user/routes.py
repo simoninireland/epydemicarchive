@@ -44,6 +44,13 @@ def edit_profile(email):
         if form.cancel.data:
             # user cancelled editing
             flash('Profile edit cancelled', 'info')
+        elif form.api_key.data:
+            # user requested a new API key
+            u.revoke_api_key()
+            u.get_api_key()
+            db.session.commit()
+            flash('New API key generated (old key has been revoked)', 'success')
+            return redirect(url_for('.edit_profile', email=email))
         else:
             # copy in the new data
             profile.name = form.name.data
@@ -57,4 +64,5 @@ def edit_profile(email):
         # jump back to home page
         return redirect(url_for('main.index'))
 
-    return render_template('profile_edit.tmpl', title='Edit profile', profile=profile, form=form)
+    return render_template('profile_edit.tmpl', title='Edit profile',
+                           user=u, profile=profile, form=form)
