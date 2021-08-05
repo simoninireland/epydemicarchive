@@ -22,7 +22,7 @@ import base64
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from epydemicarchive import db, login
+from epydemicarchive import db, login, tokenauth
 
 
 @login.user_loader
@@ -33,6 +33,14 @@ def load_user(id):
     :param id: the user id
     :returns: the user object'''
     return User.query.get(int(id))
+
+
+@tokenauth.verify_token
+def verify_api_key(k):
+    '''Retrieve the user associated with the given API key.
+
+    :returns: the user or None'''
+    return User.check_api_key(k) if k else None
 
 
 class User(UserMixin, db.Model):
@@ -48,7 +56,7 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(128))
 
     # API access
-    api_key = db.Column(db.String(128))
+    api_key = db.Column(db.String(128), index=True)
     api_key_expires= db.Column(db.DateTime)
 
 
@@ -77,28 +85,37 @@ class User(UserMixin, db.Model):
             db.session.add(self)
         return self.api_key
 
-    def check_api_key(self, token):
-        '''Check whether the given token is a valid API key for this user. To be
-        valid the token must match and not have expired.
-
-        :param token: the token presented by the client
-        :returns: True if the token is valid'''
-        now = datetime.utcnow()
-        if self.api_key is None:
-            return False
-        if self.api_key != token:
-            return False
-        if self.api_key_expires < now:
-            self.revoke_api_key()    # now we know it's expired
-            return False
-        return True
-
     def revoke_api_key(self):
         '''Revoke the API key for this user.'''
         self.api_key = None
 
 
     # ---------- Static helper methods ----------
+
+    @staticmethod
+    def check_api_key(token):
+        '''Determine whether the given API key is valid for a user, returing
+        that user if it is. To be valid the token must match and not
+        have expired.
+
+        :param token: the token presented by the client
+        :returns: the corresponding valid user or None'''
+        u = User.query.filter_by(api_key=token).first()
+        if u is None:
+            # no user associated with that API key
+            return None
+
+        # check expiry
+        now = datetime.utcnow()
+        if u.api_key_expires < now:
+            u.revoke_api_key()    # now we know it's expired
+            return None
+
+        # if we get here we have a valid key
+        return u
+
+
+    # ---------- Locators and constructors ----------
 
     @staticmethod
     def from_email(email):
