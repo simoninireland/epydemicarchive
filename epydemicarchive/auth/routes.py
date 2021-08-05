@@ -59,7 +59,9 @@ def login():
 @auth.route('/logout')
 def logout():
     '''The logout page.'''
+    id = current_user.email
     logout_user()
+    flash(f'User {id} signed-out', 'success')
     return redirect(url_for('main.index'))
 
 
