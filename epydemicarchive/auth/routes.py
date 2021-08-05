@@ -42,7 +42,7 @@ def login():
         u = User.from_email(email)
         if u is None or not u.check_password(form.password.data):
             # passwords don't match, jump back to login page
-            flash('Email and password for {u} don\'t match'.format(u=email), 'error')
+            flash(f'Email and password for {email} don\'t match', 'error')
             return redirect(url_for('auth.login'))
 
         # jump to the page the user was trying to access
