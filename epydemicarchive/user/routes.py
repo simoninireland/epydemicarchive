@@ -18,6 +18,7 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 from flask import render_template, flash, redirect, url_for, request
+from flask_login import login_required
 from epydemicarchive import db
 from epydemicarchive.auth.models import User
 from epydemicarchive.user import user
@@ -26,6 +27,7 @@ from epydemicarchive.user.models import Profile
 
 
 @user.route('/profile/<email>', methods=['GET', 'POST'])
+@login_required
 def edit_profile(email):
     '''The user profile editing page.'''
     u = User.from_email(email)
