@@ -19,22 +19,19 @@
 
 from flask import jsonify, url_for, send_file
 from werkzeug.http import HTTP_STATUS_CODES
-from epydemicarchive.api import api
+from epydemicarchive import tokenauth
+from epydemicarchive.api.v1 import api, __version__
 from epydemicarchive.archive.models import Tag, Network
 
 
-# This version of the API
-__api_version__ = 1
-
-
 def error(status, message):
-    '''Create a standar-format error message.
+    '''Create a standard-format error message.
 
     :param status: the HTTP status code
     :param message: the error message
     :returns: the formatted error'''
     payload = {
-        '_version': __api_version__,
+        '_version': __version__,
         'error': HTTP_STATUS_CODES.get(status, 'Unknown error')
     }
     if message:
@@ -45,26 +42,29 @@ def error(status, message):
 
 
 @api.route('/tags', methods=['GET'])
+@tokenauth.login_required
 def tags():
     '''Return a list of tags.'''
     res = {
-        '_version': __api_version__,
+        '_version': __version__,
         'tags': [tag.name for tag in Tag.query.all()]
     }
     return jsonify(res)
 
 
 @api.route('/networks', methods=['GET'])
+@tokenauth.login_required
 def networks():
     '''Return a list of all network UUIDs.'''
     res = {
-        '_version': __api_version__,
+        '_version': __version__,
         'uuids': [n.id for n in Network.query.all()]
     }
     return jsonify(res)
 
 
 @api.route('/network/meta/<id>', methods=['GET'])
+@tokenauth.login_required
 def network(id):
     '''Retrieve the metadata for the given network.
 
@@ -74,7 +74,7 @@ def network(id):
         return error(404, f'Network {id} not known')
 
     res = {
-        '_version': __api_version__,
+        '_version': __version__,
         'uuid': n.id,
         'uploaded': n.uploaded,
         'title': n.title,
@@ -82,14 +82,15 @@ def network(id):
         'owner': n.owner.email,
         'tags': [tag.name for tag in n.tags],
         '_links': {
-            'data': url_for(f'.data', id=id),
+            'raw': url_for('.raw', id=id),
         },
     }
     return jsonify(res)
 
 
-@api.route('/network/data/<id>')
-def data(id):
+@api.route('/network/raw/<id>')
+@tokenauth.login_required
+def raw(id):
     '''Return the network itself.
 
     :param id: the UUID of the network'''

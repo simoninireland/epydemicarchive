@@ -19,6 +19,8 @@
 
 from flask import Blueprint
 
+__version__ = 1
+
 api = Blueprint('api', __name__)
 
-from epydemicarchive.api.v1 import routes
+from . import routes
