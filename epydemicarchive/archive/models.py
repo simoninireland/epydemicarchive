@@ -191,3 +191,14 @@ class Tag(db.Model):
             # no such tag, add it to the table
             t = Tag(name=tag)
             db.session.add(t)
+
+
+class Metadata(db.Model):
+    '''The metadata table.'''
+
+    network_id = db.Column(db.ForeignKey('network.id'), nullable=False)
+    network = db.relationship('Network', backref=db.backref('metadata', lazy=True))
+
+    id = db.Column(db.Integer, primary_key=True)
+    key = db.Column(db.String(32), index=True)
+    value = db.Column(db.String(128))
