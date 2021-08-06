@@ -22,25 +22,7 @@ import base64
 from datetime import datetime, timedelta
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
-from epydemicarchive import db, login, tokenauth
-
-
-@login.user_loader
-def load_user(id):
-    '''Return the user associated with the given unique internal
-    is, used for logging in.
-
-    :param id: the user id
-    :returns: the user object'''
-    return User.query.get(int(id))
-
-
-@tokenauth.verify_token
-def verify_api_key(k):
-    '''Retrieve the user associated with the given API key.
-
-    :returns: the user or None'''
-    return User.check_api_key(k) if k else None
+from epydemicarchive import db
 
 
 class User(UserMixin, db.Model):
