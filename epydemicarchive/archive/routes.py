@@ -18,6 +18,7 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 import os
+import logging
 from flask import render_template, flash, redirect, url_for, send_file
 from flask_login import current_user
 from epydemicarchive import db
@@ -25,6 +26,8 @@ from epydemicarchive.archive import archive
 from epydemicarchive.archive.forms import UploadNetwork, EditNetwork
 from epydemicarchive.archive.models import Network
 from epydemicarchive.metadata.analyser import Analyser
+
+logger = logging.getLogger(__name__)
 
 
 @archive.route('/upload', methods=['GET', 'POST'])
@@ -48,6 +51,7 @@ def upload():
 
             db.session.commit()
             flash(f'New network uploaded as {id}', 'success')
+            logger.info(f'Network {id} uploaded')
         except Exception as e:
             flash(f'Problem uploading network: {e}', 'error')
 
@@ -102,6 +106,7 @@ def edit(id):
                 db.session.commit()
 
                 flash(f'Network {id} deleted', 'success')
+                logger.info(f'Network {id} deleted')
             else:
                 flash(f'Can\'t delete a network you don\'t own', 'error')
         else:
@@ -113,6 +118,7 @@ def edit(id):
                     db.session.commit()
 
                     flash('Network metadata edited', 'success')
+                    logger.info(f'Network {id} metadata edited')
                 except Exception as e:
                     flash(f'Problem editing network: {e}', 'error')
             else:
