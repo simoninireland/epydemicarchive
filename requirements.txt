@@ -1,4 +1,5 @@
 typing_extensions; python_version < '3.8'
+epydemic >= 1.7.1
 networkx >= 2.4
 numpy >= 1.18
 pyyaml
