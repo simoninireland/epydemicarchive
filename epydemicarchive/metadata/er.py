@@ -36,8 +36,8 @@ class ER(DegreeDistribution):
         :returns: a dict of metadata'''
         er = dict()
 
-        N = int(Metadata.query.filter_by(network=n, key='N').first().value)
-        kmean = float(Metadata.query.filter_by(network=n, key='kmean').first().value)
+        N = int(n['N'])
+        kmean = float(n['kmean'])
         gf = gf_er(N, kmean)
         if self.significance(g, gf):
             er['degree-distribution'] = 'ER'

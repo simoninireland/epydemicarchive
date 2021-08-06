@@ -94,6 +94,23 @@ class Network(db.Model):
 
         return g
 
+    def get(self, key, default=None):
+        '''Return the given metadata element. The default is returned
+        if the element is not present.
+
+        :param key: the key
+        :param default: the default value
+        :returns: the associated value or the default value'''
+        meta = Metadata.query.filter_by(network=self, key=key).first()
+        return meta.value if meta else default
+
+    def __getitem__(self, key):
+        '''Dict-based interface for accessing metadata. Uses :meth:`get`.
+
+        :param key: the key
+        :returns: the associated value'''
+        return self.get(key)
+
 
     # ---------- Static helper methods ----------
 
