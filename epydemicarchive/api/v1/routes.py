@@ -17,12 +17,14 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
-from flask import jsonify, url_for, send_file
+from flask import jsonify, url_for, send_file, request
 from werkzeug.http import HTTP_STATUS_CODES
 from epydemicarchive import tokenauth
 from epydemicarchive.api.v1 import api, __version__
 from epydemicarchive.archive.models import Tag, Network
 
+
+# ---------- Error and authorisation failure handling ----------
 
 def error(status, message=None):
     '''Create a standard-format error message.
@@ -48,6 +50,8 @@ def token_error(status):
     :param status: the HTTP status code'''
     return error(status)
 
+
+# ---------- API entry points ----------
 
 @api.route('/tags', methods=['GET'])
 @tokenauth.login_required
@@ -89,6 +93,7 @@ def network(id):
         'description': n.description,
         'owner': n.owner.email,
         'tags': [tag.name for tag in n.tags],
+        'metadata': {meta.key: meta.value for meta in n.metadata},
         '_links': {
             'raw': url_for('.raw', id=id),
         },
