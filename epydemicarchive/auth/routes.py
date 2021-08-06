@@ -63,7 +63,7 @@ def login():
         u = User.from_email(email)
         if u is None or not u.check_password(form.password.data):
             # passwords don't match, jump back to login page
-            flash(f'Email and password for {email} don\'t match', 'error')
+            flash('Email and password for {email} don\'t match. If you aren\'t registered you can do so <a href="{here}">here</a>.'.format(email=email, here=url_for('auth.register')), 'error')
             logger.info(f'Failed login for {email}')
             return redirect(url_for('auth.login'))
 

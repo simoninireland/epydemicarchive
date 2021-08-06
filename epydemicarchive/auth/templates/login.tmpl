@@ -3,11 +3,6 @@
 {% block app_content %}
   <h1>Sign in</h1>
 
-  <div class="alert alert-info" role="alert">
-    If you aren't a registered user, please register
-    <a class="alert-link" href="{{ url_for('auth.register') }}">here</a>.
-  </div>
-
   <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <p>
