@@ -54,6 +54,10 @@ login.login_view='auth.login'
 tokenauth = HTTPTokenAuth()
 
 
+# Analyser chain, initialised in create()
+metadata = None
+
+
 # Make sure the archive directory exists
 dir = Config.ARCHIVE_DIR
 if not os.path.exists(dir):
@@ -77,6 +81,9 @@ def create(config=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
+
+    # import metadata
+    import epydemicarchive.metadata
 
     # register blueprints
     from epydemicarchive.main import main

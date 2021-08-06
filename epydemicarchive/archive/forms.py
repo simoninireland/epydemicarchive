@@ -84,7 +84,7 @@ class EditNetwork(FlaskForm):
     title = StringField('Title (optional)')
     description = TextAreaField('Description (optional)')
     tags = TagField('Tags')
-    submit = SubmitField('Submit')
+    submit = SubmitField('Update')
     cancel = SubmitField('Cancel')
     download = SubmitField('Download network')
     delete = SubmitField("Delete network")

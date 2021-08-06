@@ -35,6 +35,12 @@
 	{% endif %}
       </p>
       <p>
+	Metadata:
+	{% for m in network.metadata %}
+	  {{ m.key }} -> {{ m.value }}
+	{% endfor %}
+      </p>
+      <p>
 	{% if is_owner %}
 	  {{ form.submit() }} &nbsp;
 	  {{ form.cancel() }} &nbsp;

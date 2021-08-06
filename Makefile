@@ -65,6 +65,11 @@ SOURCES_ARCHIVE_BLUEPRINT = \
 	epydemicarchive/archive/templates/upload.tmpl \
 	epydemicarchive/archive/templates/edit.tmpl \
 	epydemicarchive/archive/templates/browse.tmpl
+SOURCES_METADATA_BLUEPRINT = \
+	epydemicarchive/metadata/__init__.py \
+	epydemicarchive/metadata/analyser.py \
+	epydemicarchive/metadata/models.py \
+	epydemicarchive/metadata/topology.py
 SOURCES_API_BLUEPRINT =\
 	epydemicarchive/api/v1/__init__.py \
 	epydemicarchive/api/v1/routes.py

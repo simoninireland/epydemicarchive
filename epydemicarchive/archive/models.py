@@ -21,6 +21,7 @@ import os
 import re
 import uuid
 from datetime import datetime
+import networkx
 from flask import current_app
 from flask_login import current_user
 from epydemicarchive import db
@@ -36,7 +37,10 @@ class Network(db.Model):
     in the archive.
     '''
     # The regexp for all the acceptable extensions for network files
-    NetworkFileExtensions = re.compile('.*\.al.gz$')
+    NetworkFileExtensions = re.compile(r'.+\.al.gz$')
+
+    # The regexp to extract the file's type (extension)
+    NetworkFileType = re.compile(r'.+?\.([a-zA-Z0-9]+)(\.((gz)|(bz2)))?$')
 
     # Location information
     id = db.Column(db.String(64), primary_key=True)
@@ -67,6 +71,29 @@ class Network(db.Model):
         return os.path.join(current_app.config['ARCHIVE_DIR'],
                             self.filename)
 
+    def load_network(self):
+        '''Load the network into memory using networkx. This involves
+        working out the type of network representation uploaded.
+
+        :returns: the raw network'''
+        filename = self.network_filename()
+
+        # extract the file type from the filename
+        m = Network.NetworkFileType.match(filename)
+        if m is None:
+            raise Exception('Can\'t determine network type')
+        t = m[1]
+
+        # read network
+        if t == 'al':
+            # adjacency list
+            g = networkx.read_adjlist(filename)
+        else:
+            # unknown type
+            raise Exception(f'Unknown network file type {t}')
+
+        return g
+
 
     # ---------- Static helper methods ----------
 
@@ -86,11 +113,10 @@ class Network(db.Model):
         :param filename: the filename
         :returns: the network model's acceptable extension, or None'''
         m = Network.NetworkFileExtensions.match(filename)
-        print(filename, m)
         return None if m is None else m[0][1:]
 
     @staticmethod
-    def create_model(filename, data, title, desc, tags):
+    def create_network(filename, data, title, desc, tags):
         '''Create a new network object.
 
         :param filename: the filename of the uploaded network
@@ -98,7 +124,7 @@ class Network(db.Model):
         :param title: the network title
         :param desc: the network description
         :param tags: a list of tags for the network
-        :returns: the uuid assigned to the network'''
+        :returns: the network'''
 
         # create a UUID for this new network
         id = str(uuid.uuid4())
@@ -131,8 +157,7 @@ class Network(db.Model):
                     tags=Tag.query.filter(Tag.name.in_(alltags)).all())
         db.session.add(n)
 
-        # return the UUID genereated for the network in the archive
-        return id
+        return n
 
     @staticmethod
     def delete_network(n):

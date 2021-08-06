@@ -24,6 +24,7 @@ from epydemicarchive import db
 from epydemicarchive.archive import archive
 from epydemicarchive.archive.forms import UploadNetwork, EditNetwork
 from epydemicarchive.archive.models import Network
+from epydemicarchive.metadata.models import Metadata
 
 
 @archive.route('/upload', methods=['GET', 'POST'])
@@ -34,13 +35,18 @@ def upload():
     if form.validate_on_submit():
         try:
             # create the network
-            id = Network.create_model(form.file.data.filename,
-                                      form.file.data,
-                                      form.title.data,
-                                      form.description.data,
-                                      form.tags.data)
-            db.session.commit()
+            n = Network.create_network(form.file.data.filename,
+                                       form.file.data,
+                                       form.title.data,
+                                       form.description.data,
+                                       form.tags.data)
+            id = n.id
 
+            # extract metadata for the network
+            # TODO: this should be asynchronous
+            Metadata.analyse(n)
+
+            db.session.commit()
             flash(f'New network uploaded as {id}', 'success')
         except Exception as e:
             flash(f'Problem uploading network: {e}', 'error')
