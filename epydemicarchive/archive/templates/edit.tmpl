@@ -33,11 +33,9 @@
 	{% else %}
 	  {{ form.tags(size=32, readonly="readonly") }}
 	{% endif %}
-      </p>
-      <p>
-	Metadata:
+	<br>
 	{% for m in network.metadata %}
-	  {{ m.key }} -> {{ m.value }}
+	  {{ m.key }} =  {{ m.value }} <br>
 	{% endfor %}
       </p>
       <p>
