@@ -17,11 +17,16 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
+import logging
 from flask import jsonify, url_for, send_file, request
 from werkzeug.http import HTTP_STATUS_CODES
 from epydemicarchive import tokenauth
 from epydemicarchive.api.v1 import api, __version__
 from epydemicarchive.archive.models import Tag, Network
+
+
+# Customise logging for API calls
+logger = logging.getLogger(__name__)
 
 
 # ---------- Error and authorisation failure handling ----------
@@ -111,3 +116,15 @@ def raw(id):
     if n is None:
         return error(404, f'Network {id} not known')
     return send_file(n.network_filename())
+
+
+@api.route('/network/submit', methods=['POST'])
+@tokenauth.login_required
+def submit():
+    '''Submit a network to the archive.'''
+    submission = request.form.to_dict()
+
+    title = submission.get('title', '')
+    description = submission.get('description', '')
+    tags = submission.get('tags', [])
+    extension = submission.get('extension', '')

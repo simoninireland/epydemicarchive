@@ -17,6 +17,25 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
+import os
+import logging
+from dotenv import load_dotenv
 from epydemicarchive import create
 
+# Load environment from .env
+load_dotenv()
+
+# Set up logging
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+LOG_FILENAME = os.environ.get('LOGFILE') or 'ea.log'
+handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME,
+                                                    when='midnight',
+                                                    backupCount=7)
+formatter = logging.Formatter(format='%(levelname)s:%(name)s: [%(asctime)s] %(message)s',
+                              datefmt='%d/%b/%Y %H:%M:%S')
+logger.addHandler(handler)
+logger.setFormatter(formatter)
+
+# create the Flask app
 app = create()

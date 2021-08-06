@@ -19,17 +19,12 @@
 
 import os
 import tempfile
-from dotenv import load_dotenv
 from flask import Flask, Blueprint, redirect, render_template, url_for
 from flask_bootstrap import Bootstrap
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_httpauth import HTTPTokenAuth
-
-
-# Load environment from .env
-load_dotenv()
 
 
 # Load configuration from environment
