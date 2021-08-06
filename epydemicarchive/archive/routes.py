@@ -24,7 +24,7 @@ from epydemicarchive import db
 from epydemicarchive.archive import archive
 from epydemicarchive.archive.forms import UploadNetwork, EditNetwork
 from epydemicarchive.archive.models import Network
-from epydemicarchive.metadata.models import Metadata
+from epydemicarchive.metadata.analyser import Analyser
 
 
 @archive.route('/upload', methods=['GET', 'POST'])
@@ -44,7 +44,7 @@ def upload():
 
             # extract metadata for the network
             # TODO: this should be asynchronous
-            Metadata.analyse(n)
+            Analyser.analyse(n)
 
             db.session.commit()
             flash(f'New network uploaded as {id}', 'success')

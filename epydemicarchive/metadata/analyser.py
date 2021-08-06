@@ -18,6 +18,7 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 from epydemicarchive import db
+from epydemicarchive.archive.models import Metadata
 
 
 class Analyser:
@@ -25,6 +26,29 @@ class Analyser:
     the archive and determines something about its structure, which
     it then adds to the archive's metadata.
     '''
+
+    Chain = []
+
+    @staticmethod
+    def add_analyser(a):
+        '''Add an analyser to the chain.
+
+        :param a: the analyser'''
+        Analyser.Chain.append(a)
+
+    @staticmethod
+    def analyse(n):
+        '''Run the analysis chain over the given network, populating
+        the metadata table appropriately.
+
+        :param n: the network's archive record'''
+        g = n.load_network()
+        for a in Analyser.Chain:
+            rc = a.do(n, g)
+            for k in rc:
+                m = Metadata(network=n,
+                             key=k, value=str(rc[k]))
+                db.session.add(m)
 
     def do(self, id, g):
         '''Analyse the given network. This should be overridden by sub-classes.

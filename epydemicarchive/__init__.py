@@ -82,9 +82,6 @@ def create(config=Config):
     migrate.init_app(app, db)
     login.init_app(app)
 
-    # import metadata
-    import epydemicarchive.metadata
-
     # register blueprints
     from epydemicarchive.main import main
     app.register_blueprint(main)
@@ -96,6 +93,9 @@ def create(config=Config):
     app.register_blueprint(archive, url_prefix='/archive')
     from epydemicarchive.api.v1 import api as api_v1
     app.register_blueprint(api_v1, url_prefix='/api/v1')
+
+    # import metadata analysers
+    import epydemicarchive.metadata
 
     # custom error handlers
     def page_not_found(e):

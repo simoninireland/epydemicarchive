@@ -1,4 +1,4 @@
-# Topology analyser
+# Erdos-Renyi network analyser
 #
 # Copyright (C) 2021 Simon Dobson
 #
@@ -17,40 +17,33 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
-from numpy import mean, median, var
+from epydemic.gf import gf_er
 from epydemicarchive.archive.models import Metadata
 from epydemicarchive.metadata.analyser import Analyser
+from epydemicarchive.metadata.degreedistribution import DegreeDistribution
 
 
-class Topology(Analyser):
-    '''An analyser that extracts basic topological features and
-    summary statistics.
+class ER(DegreeDistribution):
+    '''An analyser that checks for Erdos-Renyi degree topology.
     '''
 
     def do(self, n, g):
-        '''Analyse the topology of the given network.
+        '''Compare the degree distribution of the network against
+        that expected of an ER network.
 
         :param n: the network's archive record
         :param g: the networkx representation of the network
         :returns: a dict of metadata'''
-        topology = dict()
+        er = dict()
 
-        # order
-        topology['N'] = g.order()
-        topology['M'] = g.number_of_edges()
+        N = int(Metadata.query.filter_by(network=n, key='N').first().value)
+        kmean = float(Metadata.query.filter_by(network=n, key='kmean').first().value)
+        gf = gf_er(N, kmean)
+        if self.significance(g, gf):
+            er['degree-distribution'] = 'ER'
 
-        # extremal degrees
-        degrees = sorted([d for (N, d) in list(g.degree)])
-        topology['kmin'] = degrees[0]
-        topology['kmax'] = degrees[-1]
-
-        # degree summary statistics
-        topology['kmean'] = mean(degrees)
-        topology['kmedian'] = median(degrees)
-        topology['kvar'] = var(degrees)
-
-        return topology
+        return er
 
 
 # add an instance to the chain
-Analyser.add_analyser(Topology())
+Analyser.add_analyser(ER())

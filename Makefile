@@ -68,8 +68,9 @@ SOURCES_ARCHIVE_BLUEPRINT = \
 SOURCES_METADATA_BLUEPRINT = \
 	epydemicarchive/metadata/__init__.py \
 	epydemicarchive/metadata/analyser.py \
-	epydemicarchive/metadata/models.py \
-	epydemicarchive/metadata/topology.py
+	epydemicarchive/metadata/topology.py \
+	epydemicarchive/metadata/degreedistribution.py \
+	epydemicarchive/metadata/er.py
 SOURCES_API_BLUEPRINT =\
 	epydemicarchive/api/v1/__init__.py \
 	epydemicarchive/api/v1/routes.py
@@ -81,6 +82,7 @@ SOURCES_CODE = \
 	$(SOURCES_AUTH_BLUEPRINT) \
 	$(SOURCES_USER_BLUEPRINT) \
 	$(SOURCES_ARCHIVE_BLUEPRINT) \
+	$(SOURCES_METADATA_BLUEPRINT) \
 	$(SOURCES_API_BLUEPRINT)
 SOURCES_TESTS = \
 	test/app.py
