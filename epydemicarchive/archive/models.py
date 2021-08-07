@@ -37,7 +37,7 @@ class Network(db.Model):
     in the archive.
     '''
     # The regexp for all the acceptable extensions for network files
-    NetworkFileExtensions = re.compile(r'.+\.al.gz$')
+    NetworkFileExtensions = re.compile(r'.+?\.(al.gz)$')
 
     # The regexp to extract the file's type (extension)
     NetworkFileType = re.compile(r'.+?\.([a-zA-Z0-9]+)(\.((gz)|(bz2)))?$')
@@ -130,12 +130,13 @@ class Network(db.Model):
         :param filename: the filename
         :returns: the network model's acceptable extension, or None'''
         m = Network.NetworkFileExtensions.match(filename)
-        return None if m is None else m[0][1:]
+        return None if m is None else m[1]
 
     @staticmethod
-    def create_network(filename, data, title, desc, tags):
+    def create_network(user, filename, data, title, desc, tags):
         '''Create a new network object.
 
+        :param user: the owner of the network
         :param filename: the filename of the uploaded network
         :param data: the uploaded network data stream
         :param title: the network title
@@ -166,7 +167,7 @@ class Network(db.Model):
         now = datetime.utcnow()
         n = Network(id=id,
                     filename=basename,
-                    owner=current_user,
+                    owner=user,
                     uploaded=now,
                     available=False,
                     title=title,
