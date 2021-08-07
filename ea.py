@@ -19,6 +19,7 @@
 
 import os
 import logging
+import logging.handlers
 from dotenv import load_dotenv
 from epydemicarchive import create
 
@@ -26,16 +27,16 @@ from epydemicarchive import create
 load_dotenv()
 
 # Set up logging
-logger = logging.getLogger()
+logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 LOG_FILENAME = os.environ.get('LOGFILE') or 'ea.log'
 handler = logging.handlers.TimedRotatingFileHandler(LOG_FILENAME,
                                                     when='midnight',
                                                     backupCount=7)
-formatter = logging.Formatter(format='%(levelname)s:%(name)s: [%(asctime)s] %(message)s',
+formatter = logging.Formatter('%(levelname)s:%(name)s: [%(asctime)s] %(message)s',
                               datefmt='%d/%b/%Y %H:%M:%S')
 logger.addHandler(handler)
-logger.setFormatter(formatter)
+handler.setFormatter(formatter)
 
 # create the Flask app
 app = create()
