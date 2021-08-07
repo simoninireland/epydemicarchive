@@ -18,11 +18,14 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 import logging
+import json
 from flask import jsonify, url_for, send_file, request
 from werkzeug.http import HTTP_STATUS_CODES
-from epydemicarchive import tokenauth
+from epydemicarchive import tokenauth, db
 from epydemicarchive.api.v1 import api, __version__
 from epydemicarchive.archive.models import Tag, Network
+from epydemicarchive.auth.models import User
+from epydemicarchive.metadata.analyser import Analyser
 
 
 # Customise logging for API calls
@@ -112,7 +115,7 @@ def raw(id):
     '''Return the network itself.
 
     :param id: the UUID of the network'''
-    n = Network.query.filter_by(id=id).first()
+    n = Network.from_uuid(id)
     if n is None:
         return error(404, f'Network {id} not known')
     return send_file(n.network_filename())
@@ -122,9 +125,45 @@ def raw(id):
 @tokenauth.login_required
 def submit():
     '''Submit a network to the archive.'''
-    submission = request.form.to_dict()
+    user = tokenauth.current_user()
+    email = user.email
 
+    # retrieve the metadata for the submission
+    if 'meta' not in request.files:
+        error(400, 'No metadata supplied for submitted network')
+    submission = json.load(request.files['meta'])
+    filename = submission.get('filename')
+    if filename is None:
+        error(400, 'No filename given for submitted network (can\'t determine file type)')
     title = submission.get('title', '')
     description = submission.get('description', '')
     tags = submission.get('tags', [])
-    extension = submission.get('extension', '')
+
+    # retieve raw network_filename
+    if 'raw' not in request.files:
+        return error(400, 'No submitted network')
+    raw = request.files['raw']
+    print(filename)
+
+    # create the network
+    n = Network.create_network(user,
+                               filename,
+                               raw,
+                               title,
+                               description,
+                               tags)
+    uuid = n.id
+
+    # extract metadata for the network
+    # TODO: this should be asynchronous
+    Analyser.analyse(n)
+
+    db.session.commit()
+    logging.info(f'Network {uuid} submitted by {email}')
+
+    # return the UUID for the newly-created network
+    res = {
+        '_version': __version__,
+        'uuid': uuid
+        }
+    return jsonify(res)
