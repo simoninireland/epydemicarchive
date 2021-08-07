@@ -17,21 +17,9 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
-import os
-import logging
 from dotenv import load_dotenv
 from epydemicarchive import create
 
 load_dotenv()
-
-try:
-    os.remove('ea.log')
-except Exception:
-    pass
-
-logging.basicConfig(filename='ea.log',
-                    level=logging.INFO,
-                    format='%(levelname)s:%(name)s: [%(asctime)s] %(message)s',
-                    datefmt='%d/%b/%Y %H:%M:%S')
 
 app = create()
