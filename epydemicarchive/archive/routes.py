@@ -38,20 +38,21 @@ def upload():
     if form.validate_on_submit():
         try:
             # create the network
-            n = Network.create_network(form.file.data.filename,
+            n = Network.create_network(current_user,
+                                       form.file.data.filename,
                                        form.file.data,
                                        form.title.data,
                                        form.description.data,
                                        form.tags.data)
-            id = n.id
+            uuid = n.id
 
             # extract metadata for the network
             # TODO: this should be asynchronous
             Analyser.analyse(n)
 
             db.session.commit()
-            flash(f'New network uploaded as {id}', 'success')
-            logger.info(f'Network {id} uploaded')
+            flash(f'New network uploaded as {uuid}', 'success')
+            logger.info(f'Network {uuid} uploaded')
         except Exception as e:
             flash(f'Problem uploading network: {e}', 'error')
 
