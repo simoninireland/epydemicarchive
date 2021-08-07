@@ -136,10 +136,10 @@ class User(UserMixin, db.Model):
 
         :param email: the user's email address
         :param password: the password
-        :returns: the email address'''
+        :returns: the user'''
         u = User(email=email)
         u.set_password(password)
         u.get_api_key()
         db.session.add(u)
 
-        return email
+        return u

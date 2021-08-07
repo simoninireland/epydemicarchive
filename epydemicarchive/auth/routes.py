@@ -95,11 +95,12 @@ def register():
     form = Register()
     if form.validate_on_submit():
         # create the user
-        id = User.create_user(form.email.data, form.password.data)
+        u = User.create_user(form.email.data, form.password.data)
+        email = u.email
         db.session.commit()
 
         # jump back to home page
-        flash(f'User {id} created', 'success')
+        flash(f'User {email} created', 'success')
         logger.info(f'User {email} created')
         return redirect(url_for('main.index'))
 
