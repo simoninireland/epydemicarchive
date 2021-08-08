@@ -19,6 +19,9 @@
 
 from . import analyser
 
+# file hash
+from . import hash
+
 # general topological properties
 from . import topology
 
