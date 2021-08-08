@@ -178,14 +178,12 @@ class Network(db.Model):
 
         :param n: the network'''
 
-        # delete record
+        # delete the network record
         db.session.delete(n)
 
         # delete network file -- in this order to make
         # sure we don't end up with dangling files
         os.remove(n.network_filename())
-
-
 
 
 class Tag(db.Model):
