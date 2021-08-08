@@ -30,7 +30,7 @@ class Topology(Analyser):
     def do(self, n, g):
         '''Analyse the topology of the given network.
 
-        :param n: the network's archive record
+        :param n: the network
         :param g: the networkx representation of the network
         :returns: a dict of metadata'''
         topology = dict()

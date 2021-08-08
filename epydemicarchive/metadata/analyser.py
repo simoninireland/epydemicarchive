@@ -50,9 +50,9 @@ class Analyser:
                              key=k, value=str(rc[k]))
                 db.session.add(m)
 
-    def do(self, id, g):
+    def do(self, n, g):
         '''Analyse the given network. This should be overridden by sub-classes.
 
-        :param id: the UUID of the network
-        :param g: the network'''
+        :param n: the network
+        :param g: the networkx representatiojn of the network'''
         raise NotImplementedError('analyse')

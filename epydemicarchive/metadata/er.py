@@ -31,7 +31,7 @@ class ER(DegreeDistribution):
         '''Compare the degree distribution of the network against
         that expected of an ER network.
 
-        :param n: the network's archive record
+        :param n: the network
         :param g: the networkx representation of the network
         :returns: a dict of metadata'''
         er = dict()
