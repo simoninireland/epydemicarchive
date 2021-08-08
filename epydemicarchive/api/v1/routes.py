@@ -21,6 +21,7 @@ import logging
 import json
 from flask import jsonify, url_for, send_file, request
 from werkzeug.http import HTTP_STATUS_CODES
+from markupsafe import escape
 from epydemicarchive import tokenauth, db
 from epydemicarchive.api.v1 import api, __version__
 from epydemicarchive.archive.models import Tag, Network
@@ -135,9 +136,9 @@ def submit():
     filename = submission.get('filename')
     if filename is None:
         error(400, 'No filename given for submitted network (can\'t determine file type)')
-    title = submission.get('title', '')
-    description = submission.get('description', '')
-    tags = submission.get('tags', [])
+    title = escape(submission.get('title', ''))
+    description = escape(submission.get('description', ''))
+    tags = map(escape, submission.get('tags', []))
 
     # retieve raw network_filename
     if 'raw' not in request.files:
