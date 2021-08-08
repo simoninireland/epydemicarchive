@@ -55,8 +55,9 @@ class Network(db.Model):
     description = db.Column(db.String(1024))
     tags = db.relationship('Tag', secondary=tags, lazy='subquery',
                            backref=db.backref('networks', lazy=True))
-    user_id = db.Column(db.String(128), db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.ForeignKey('user.id'), nullable=False)
     owner = db.relationship('User', backref=db.backref('networks', lazy=True))
+
 
     def tagnames(self):
         '''Return a list of tag names.
@@ -157,12 +158,6 @@ class Network(db.Model):
         # save the uploaded network into the archive directory
         data.save(full)
 
-        # make sure all the tags exist in the tags table
-        for tag in tags:
-            print(f'New tag {tag}')
-            Tag.create_tag(tag)
-        alltags = set(tags)
-
         # create the network
         now = datetime.utcnow()
         n = Network(id=id,
@@ -172,7 +167,7 @@ class Network(db.Model):
                     available=False,
                     title=title,
                     description=desc,
-                    tags=Tag.query.filter(Tag.name.in_(alltags)).all())
+                    tags=Tag.ensure_tags(tags))
         db.session.add(n)
 
         return n
@@ -183,11 +178,14 @@ class Network(db.Model):
 
         :param n: the network'''
 
-        # delete network file
-        os.remove(n.network_filename())
-
         # delete record
         db.session.delete(n)
+
+        # delete network file -- in this order to make
+        # sure we don't end up with dangling files
+        os.remove(n.network_filename())
+
+
 
 
 class Tag(db.Model):
@@ -205,18 +203,33 @@ class Tag(db.Model):
 
         :param tag: the tag'''
         tag = tag.lower()
-        if Tag.query.filter_by(name=tag).first() is None:
+        t = Tag.query.filter_by(name=tag).first()
+        if t is None:
             # no such tag, add it to the table
             t = Tag(name=tag)
             db.session.add(t)
+        return t
+
+    @staticmethod
+    def ensure_tags(tags):
+        '''Ensure all tags exist in the table.
+
+        :param tags: a list of tags
+        :returns: a list of Tag objects'''
+        alltags = []
+        for tag in tags:
+            alltags.append(Tag.create_tag(tag))
+        return alltags
 
 
 class Metadata(db.Model):
     '''The metadata table.'''
 
-    network_id = db.Column(db.ForeignKey('network.id'), nullable=False)
-    network = db.relationship('Network', backref=db.backref('metadata', lazy=True))
-
     id = db.Column(db.Integer, primary_key=True)
+    network_id = db.Column(db.ForeignKey('network.id'), nullable=False)
+    network = db.relationship('Network',
+                              backref=db.backref('metadata', lazy=True,
+                                                 cascade='all, delete-orphan'),
+                              cascade='all')
     key = db.Column(db.String(32), index=True)
     value = db.Column(db.String(128))

@@ -21,10 +21,11 @@ import os
 import logging
 from flask import render_template, flash, redirect, url_for, send_file
 from flask_login import current_user
+from markupsafe import escape
 from epydemicarchive import db
 from epydemicarchive.archive import archive
 from epydemicarchive.archive.forms import UploadNetwork, EditNetwork
-from epydemicarchive.archive.models import Network
+from epydemicarchive.archive.models import Network, Tag
 from epydemicarchive.metadata.analyser import Analyser
 
 logger = logging.getLogger(__name__)
@@ -41,9 +42,9 @@ def upload():
             n = Network.create_network(current_user,
                                        form.file.data.filename,
                                        form.file.data,
-                                       form.title.data,
-                                       form.description.data,
-                                       form.tags.data)
+                                       escape(form.title.data),
+                                       escape(form.description.data),
+                                       list(map(escape, form.tags.data)))
             uuid = n.id
 
             # extract metadata for the network
@@ -101,7 +102,7 @@ def edit(id):
         # TODO: flask_principal should help against this?
         elif form.delete.data:
             # user deletes network
-            # TODO: should be confirmed,preferably in-line
+            # TODO: should be confirmed, preferably in-line
             if current_user == n.owner:
                 Network.delete_network(n)
                 db.session.commit()
@@ -114,8 +115,10 @@ def edit(id):
             if current_user == n.owner:
                 try:
                     # copy in new data
-                    n.title = form.title.data
-                    n.description = form.description.data
+                    n.title = escape(form.title.data)
+                    n.description = escape(form.description.data)
+                    ntags = Tag.ensure_tags(form.tags.data)
+
                     db.session.commit()
 
                     flash('Network metadata edited', 'success')
