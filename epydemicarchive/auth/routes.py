@@ -36,7 +36,7 @@ def load_user(id):
 
     :param id: the user id
     :returns: the user object'''
-    return User.query.get(int(id))
+    return User.from_id(id)
 
 
 @tokenauth.verify_token
@@ -44,7 +44,7 @@ def verify_api_key(k):
     '''Retrieve the user associated with the given API key.
 
     :returns: the user or None'''
-    return User.check_api_key(k) if k else None
+    return User.from_api_key(k) if k else None
 
 
 @auth.route('/login', methods=['GET', 'POST'])

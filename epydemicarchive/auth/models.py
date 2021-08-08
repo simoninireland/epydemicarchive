@@ -100,6 +100,14 @@ class User(UserMixin, db.Model):
     # ---------- Locators and constructors ----------
 
     @staticmethod
+    def from_id(id) :
+        '''Retrieve the user with the given unique id
+
+        :param idthe id
+        :returns: the user or None'''
+        return User.query.get(id)
+
+    @staticmethod
     def from_email(email):
         '''Retrieve the user with the given email address.
 
