@@ -1,0 +1,65 @@
+{% extends 'base.tmpl' %}
+
+{% block app_content %}
+  <h1>Search the archive</h1>
+
+  <p>
+    Show only networks with:<br>
+    <form action="" method="post" novalidate>
+      {{ form.hidden_tag() }}
+      <p>
+	{{ form.tags.label }}<br>
+	{{ form.tags(size=32) }}
+      </p>
+      <p>
+	Add tag: {{ form.add_tag(size=5) }}
+      </p>
+      <p>
+	{{ form.metadata.label }}<br>
+	{{ form.metadata(size=32) }}
+      </p>
+      <p>
+	Add metadata constraint: {{ form.add_meta_key(size=5) }} {{
+	form.add_meta_value(size=10) }}
+      </p>
+      <p>
+	{{ form.refine() }} &nbsp; {{ form.reset() }}
+      </p>
+    </form>
+  </p>
+
+  <table class="table">
+    <thead>
+      <tr>
+	<th scope="col">Title</th>
+	<th scope="col">Owner</th>
+	<th scope="col">Tags</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for n in networks %}
+	<tr>
+	  <td>
+	    {% if n.title != '' %}
+	      <a href="{{ url_for('archive.edit', id=n.id) }}">{{n.title}} ({{ n.id }})</a>
+	    {% else %}
+	      <a href="{{ url_for('archive.edit', id=n.id) }}">{{ n.id }}</a>
+	    {% endif %}
+	  </td>
+	  <td>{{ n.owner.email }}</td>
+	  <td>
+	    {% with tags = n.tagnames() %}
+	      {%if tags %}
+		<div class="btn-group" role="group" aria-label="tags">
+		  {% for tag in tags %}
+		    <button type="button" class="btn btn-default">{{ tag }}</button>&nbsp;
+		  {% endfor %}
+		</div>
+	      {% endif %}
+	    {% endwith %}
+	  </td>
+	</tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}
