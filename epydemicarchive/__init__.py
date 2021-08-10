@@ -25,6 +25,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_httpauth import HTTPTokenAuth
+from jinja2 import Template, contextfilter
 from epydemicarchive.metadata import AnalyserChain
 
 
@@ -102,5 +103,11 @@ def create(config=Config):
     def page_not_found(e):
         return render_template('404.tmpl'), 404
     app.register_error_handler(404, page_not_found)
+
+    # custom Jinja2 filters
+    @contextfilter
+    def inner_render(context, value):
+        return Template(value).render(context)
+    app.jinja_env.filters['inner_render'] = inner_render
 
     return app

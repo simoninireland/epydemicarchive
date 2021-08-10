@@ -26,7 +26,6 @@ from epydemicarchive.main import main, pages_dir
 @main.route('/index.html')
 def index():
     '''The landing page for the site.'''
-
     return redirect(url_for('.page', pg='index.html'))
 
 
