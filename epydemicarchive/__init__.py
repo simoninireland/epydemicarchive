@@ -25,19 +25,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_httpauth import HTTPTokenAuth
-
-
-# Load configuration from environment
-class Config:
-    # Web forms
-    SECRET_KEY = os.environ.get('SECRET_KEY') or 'A secret'
-
-    # Database connection and tweaks
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + tempfile.mkstemp(suffix='.db')
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # Directory for storing networks
-    ARCHIVE_DIR = os.environ.get('ARCHIVE_DIR') or tempfile.mkdtemp()
+from flask_sessionstore import Session
 
 
 # Instanciate all the extensions
@@ -47,10 +35,30 @@ migrate = Migrate()
 login = LoginManager()
 login.login_view='auth.login'
 tokenauth = HTTPTokenAuth()
+sss = Session()
 
 
 # Analyser chain, initialised in create()
 metadata = None
+
+
+# Load configuration from environment
+class Config:
+    # Web forms and cookies
+    SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32)
+
+    # Database connection and tweaks
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + tempfile.mkstemp(suffix='.db')
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+    # Directory for storing networks
+    ARCHIVE_DIR = os.environ.get('ARCHIVE_DIR') or tempfile.mkdtemp()
+
+    # Server-side sessions in the database
+    # sd: this might need to change to be less persistent
+    SESSION_TYPE = 'sqlalchemy'
+    SESSION_SQLALCHEMY_TABLE = 'sessions'
+    SESSION_SQLALCHEMY = db
 
 
 # Make sure the archive directory exists
@@ -58,7 +66,7 @@ dir = Config.ARCHIVE_DIR
 if not os.path.exists(dir):
     try:
         os.makedirs(dir)
-    except os.OSError as e:
+    except OSError as e:
         # failed to create, log and re-raise
         raise e
 
@@ -76,21 +84,22 @@ def create(config=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
+    sss.init_app(app)
 
     # register blueprints
-    from epydemicarchive.main import main
+    from epydemicarchive.main import main                   # main application
     app.register_blueprint(main)
-    from epydemicarchive.auth import auth
+    from epydemicarchive.auth import auth                   # authentication
     app.register_blueprint(auth, url_prefix='/auth')
-    from epydemicarchive.user import user
+    from epydemicarchive.user import user                   # user profiles
     app.register_blueprint(user, url_prefix='/user')
-    from epydemicarchive.archive import archive
+    from epydemicarchive.archive import archive             # network archive management
     app.register_blueprint(archive, url_prefix='/archive')
-    from epydemicarchive.api.v1 import api as api_v1
+    from epydemicarchive.api.v1 import api as api_v1        # API (v1) access
     app.register_blueprint(api_v1, url_prefix='/api/v1')
 
     # import metadata analysers
-    import epydemicarchive.metadata
+    import epydemicarchive.metadata                         # network analysers
 
     # custom error handlers
     def page_not_found(e):
