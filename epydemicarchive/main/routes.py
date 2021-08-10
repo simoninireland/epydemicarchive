@@ -33,6 +33,8 @@ def index():
 def page(pg):
     '''Render a page whose content is held statically within
     package, but that's rendered into a template for consistency.
+    The static page is itself treated as a template, meaning it can
+    contain generated links and the like.
 
     :param pg: the page'''
     filename = os.path.join(pages_dir, pg)
