@@ -26,6 +26,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_httpauth import HTTPTokenAuth
 from flask_sessionstore import Session
+from epydemicarchive.metadata import AnalyserChain
 
 
 # Instanciate all the extensions
@@ -36,10 +37,7 @@ login = LoginManager()
 login.login_view='auth.login'
 tokenauth = HTTPTokenAuth()
 sss = Session()
-
-
-# Analyser chain, initialised in create()
-metadata = None
+analyser = AnalyserChain()
 
 
 # Load configuration from environment
@@ -86,6 +84,9 @@ def create(config=Config):
     login.init_app(app)
     sss.init_app(app)
 
+    # bind the metadata analyser
+    analyser.init_app(app)
+
     # register blueprints
     from epydemicarchive.main import main                   # main application
     app.register_blueprint(main)
@@ -93,13 +94,18 @@ def create(config=Config):
     app.register_blueprint(auth, url_prefix='/auth')
     from epydemicarchive.user import user                   # user profiles
     app.register_blueprint(user, url_prefix='/user')
-    from epydemicarchive.archive import archive             # network archive management
+    from epydemicarchive.archive import archive             # archive management
     app.register_blueprint(archive, url_prefix='/archive')
     from epydemicarchive.api.v1 import api as api_v1        # API (v1) access
     app.register_blueprint(api_v1, url_prefix='/api/v1')
 
-    # import metadata analysers
-    import epydemicarchive.metadata                         # network analysers
+    # register analysers
+    from epydemicarchive.metadata.hash import Hash          # SHA256 of network
+    analyser.register_analyser(Hash())
+    from epydemicarchive.metadata.topology import Topology  # basic metrics
+    analyser.register_analyser(Topology())
+    from epydemicarchive.metadata.er import ER              # ER check
+    analyser.register_analyser(ER())
 
     # custom error handlers
     def page_not_found(e):

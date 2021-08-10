@@ -23,12 +23,11 @@ from flask import render_template, flash, redirect, url_for, send_file, session
 from flask_login import current_user
 from wtforms import FormField
 from markupsafe import escape
-from epydemicarchive import db
+from epydemicarchive import db, analyser
 from epydemicarchive.archive import archive
 from epydemicarchive.archive.forms import UploadNetwork, EditNetwork, SearchNetworks
 from epydemicarchive.archive.models import Network, Tag
 from epydemicarchive.archive.queries import QueryNetworks
-from epydemicarchive.metadata.analyser import Analyser
 
 logger = logging.getLogger(__name__)
 
@@ -51,7 +50,7 @@ def upload():
 
             # extract metadata for the network
             # TODO: this should be asynchronous
-            Analyser.analyse(n)
+            analyser.analyse(n)
 
             db.session.commit()
             flash(f'New network uploaded as {uuid}', 'success')

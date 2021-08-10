@@ -47,7 +47,3 @@ class Hash(Analyser):
 
         rc = {'sha256': h.hexdigest()}
         return rc
-
-
-# add an instance to the chain
-Analyser.add_analyser(Hash())

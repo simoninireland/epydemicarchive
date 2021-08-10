@@ -17,14 +17,4 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
-from . import analyser
-
-# file hash
-from . import hash
-
-# general topological properties
-from . import topology
-
-# specific degree distribution model-fitting
-from . import degreedistribution
-from . import er
+from .analyser import Analyser, AnalyserChain

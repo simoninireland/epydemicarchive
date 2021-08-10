@@ -18,7 +18,6 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 from numpy import mean, median, var
-from epydemicarchive.archive.models import Metadata
 from epydemicarchive.metadata.analyser import Analyser
 
 
@@ -50,7 +49,3 @@ class Topology(Analyser):
         topology['kvar'] = var(degrees)
 
         return topology
-
-
-# add an instance to the chain
-Analyser.add_analyser(Topology())

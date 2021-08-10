@@ -18,7 +18,6 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 from epydemic.gf import gf_er
-from epydemicarchive.archive.models import Metadata
 from epydemicarchive.metadata.analyser import Analyser
 from epydemicarchive.metadata.degreedistribution import DegreeDistribution
 
@@ -43,7 +42,3 @@ class ER(DegreeDistribution):
             er['degree-distribution'] = 'ER'
 
         return er
-
-
-# add an instance to the chain
-Analyser.add_analyser(ER())
