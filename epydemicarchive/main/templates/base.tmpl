@@ -80,7 +80,7 @@
 	  {% else %}
 	    <div class="alert alert-info" role="alert">
 	  {% endif %}
-	      {{ message }}
+	  {{ message }}
 	    </div>
 	{% endfor %}
       {% endif %}
@@ -88,5 +88,11 @@
 
     {# application content needs to be provided in the app_content block #}
     {% block app_content %}{% endblock %}
+
+    <hr>
+    <p>
+      Copyright &copy;
+      2021, <a href="mailto:simoninireland@gmail.com">Simon Dobson</a>.
+    </p>
   </div>
 {% endblock %}
