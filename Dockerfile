@@ -23,13 +23,12 @@ RUN useradd ea
 WORKDIR /home/ea
 
 ENV FLASK_APP ea.py
-ENV SECRET_KEY aaaabbbbccc
-ENV DATABASE_URI sqlite:////home/ea/ea.db
-ENV ARCHIVE_DIR /home/ea/archive.d
+ENV DATABASE_URI sqlite:////home/ea/data/ea.db
+ENV ARCHIVE_DIR /home/ea/data/archive.d
 
 COPY requirements.txt requirements.txt
 RUN python -m venv venv
-RUN venv/bin/pip install wheel
+RUN venv/bin/pip install -U pip wheel
 RUN venv/bin/pip install -r requirements.txt
 RUN venv/bin/pip install gunicorn
 

@@ -61,17 +61,20 @@ SOURCES_ARCHIVE_BLUEPRINT = \
 	epydemicarchive/archive/__init__.py \
 	epydemicarchive/archive/models.py \
 	epydemicarchive/archive/forms.py \
+	epydemicarchive/archive/queries.py \
 	epydemicarchive/archive/routes.py \
 	epydemicarchive/archive/templates/upload.tmpl \
 	epydemicarchive/archive/templates/edit.tmpl \
-	epydemicarchive/archive/templates/browse.tmpl
+	epydemicarchive/archive/templates/browse.tmpl \
+	epydemicarchive/archive/templates/search.tmpl
 SOURCES_METADATA_BLUEPRINT = \
 	epydemicarchive/metadata/__init__.py \
 	epydemicarchive/metadata/analyser.py \
+	epydemicarchive/metadata/hash.py \
 	epydemicarchive/metadata/topology.py \
 	epydemicarchive/metadata/degreedistribution.py \
 	epydemicarchive/metadata/er.py
-SOURCES_API_BLUEPRINT =\
+SOURCES_API_V1_BLUEPRINT =\
 	epydemicarchive/api/v1/__init__.py \
 	epydemicarchive/api/v1/routes.py
 SOURCES_CODE = \
@@ -83,7 +86,7 @@ SOURCES_CODE = \
 	$(SOURCES_USER_BLUEPRINT) \
 	$(SOURCES_ARCHIVE_BLUEPRINT) \
 	$(SOURCES_METADATA_BLUEPRINT) \
-	$(SOURCES_API_BLUEPRINT)
+	$(SOURCES_API_V1_BLUEPRINT)
 SOURCES_TESTS = \
 	test/app.py
 TESTSUITE = test
@@ -229,12 +232,12 @@ check-local-repo-clean:
 	if [ "$(GIT_DIRTY)" ]; then echo "Uncommitted files: $(GIT_DIRTY)"; exit 1; fi
 
 # Build a docker image
-docker: $(SOURCES_CODE) Makefile $(DOCKERFILE)
+docker-image: $(SOURCES_CODE) Makefile $(DOCKERFILE)
 	$(DOCKER) build -t $(DOCKER_IMAGE):latest .
 
-# Run the server in a Docker container
-dockerlive:
-	$(DOCKER) run --name ea -p 8000:5000 --rm $(DOCKER_IMAGE):latest
+# Run the server live in a Docker container
+docker-live:
+	$(DOCKER) run --name ea -p 8050:5000 --mount type=bind,source="$(ROOT)",target=/home/ea/data --rm $(DOCKER_IMAGE):latest
 
 # Clean up the distribution build
 clean:
@@ -277,7 +280,8 @@ Available targets:
    make wheel	     create binary (wheel) distribution
    make upload       upload distribution to PyPi
    make commit       tag current version and and push to master repo
-   make docker       build a Docker image
+   make docker-image build a Docker image
+   make docker-live  run a test server in a Docker container
    make clean        clean-up the build
    make reallyclean  clean up the virtualenv as well
 
