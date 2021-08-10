@@ -27,7 +27,7 @@ class Hash(Analyser):
     so is potentially expensive when applied to large networks.
     '''
 
-    CHUNKSIZE = 4096    #: Size of chunks read from file.
+    CHUNKSIZE = 4096    #: Size of chunks to read from file.
 
     def do(self, n, g):
         '''Analyse the topology of the given network.
@@ -43,7 +43,6 @@ class Hash(Analyser):
                 if len(bs) == 0:
                     break
                 h.update(bs)
-        print(f' SHA256 = {h}')
 
         rc = {'sha256': h.hexdigest()}
         return rc
