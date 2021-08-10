@@ -21,4 +21,4 @@ from flask import Blueprint
 
 archive = Blueprint('archive', __name__, template_folder='templates')
 
-from . import models, forms, routes
+from . import models, queries, forms, routes

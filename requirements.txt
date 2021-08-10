@@ -13,3 +13,4 @@ flask-sqlalchemy
 flask-migrate
 flask-login
 flask-httpauth
+flask-sessionstore

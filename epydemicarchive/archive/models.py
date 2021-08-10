@@ -23,7 +23,6 @@ import uuid
 from datetime import datetime
 import networkx
 from flask import current_app
-from flask_login import current_user
 from epydemicarchive import db
 
 
@@ -132,6 +131,34 @@ class Network(db.Model):
         :returns: the network model's acceptable extension, or None'''
         m = Network.NetworkFileExtensions.match(filename)
         return None if m is None else m[1]
+
+    @staticmethod
+    def getstuff(key, value, q=None):
+        '''Query the set of networks to extract only those with the given
+        key-value mapping in their metada. The value is either a singleton
+        (testing for equality) or a pair (testing for inclusive) range). If
+        supplied, q is a previous query that is being refined by this query.
+
+        :param key: the metadata keys
+        :param value: the metadata value, either a singleton or a range
+        :param q: (optional) the query to refine
+        :returns: a list of networks and the query'''
+        if q is None:
+            q1 = Network.query
+        else:
+            q1 = db.aliased(Network, q.subquery()).query
+
+        if isinstance(value, tuple):
+            # value is a range
+            pass
+        else:
+            # value is a singleton, check for equality
+            q2 = q1.join(Metadata.network).filter(Metadata.key == key,
+                                                  Metadata.value == value)
+
+        # return the matching networks and the query
+        return (list(q2), q2)
+
 
     @staticmethod
     def create_network(user, filename, data, title, desc, tags):

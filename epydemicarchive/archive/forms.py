@@ -18,7 +18,7 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 from flask_wtf import FlaskForm
-from wtforms import Field, StringField, TextAreaField, SubmitField
+from wtforms import Field, StringField, TextAreaField, SubmitField, SelectMultipleField, FormField, FieldList
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
 from wtforms.widgets import TextInput
@@ -88,3 +88,14 @@ class EditNetwork(FlaskForm):
     cancel = SubmitField('Cancel')
     download = SubmitField('Download network')
     delete = SubmitField("Delete network")
+
+
+class SearchNetworks(FlaskForm):
+
+    tags = TagField('Tags')
+    metadata = StringField('Metadata')
+    add_tag = StringField('New tag')
+    add_meta_key = StringField('New key')
+    add_meta_value = StringField('New value')
+    refine = SubmitField('Refine selection')
+    reset = SubmitField("Reset selection")

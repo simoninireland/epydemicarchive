@@ -19,13 +19,15 @@
 
 import os
 import logging
-from flask import render_template, flash, redirect, url_for, send_file
+from flask import render_template, flash, redirect, url_for, send_file, session
 from flask_login import current_user
+from wtforms import FormField
 from markupsafe import escape
 from epydemicarchive import db
 from epydemicarchive.archive import archive
-from epydemicarchive.archive.forms import UploadNetwork, EditNetwork
+from epydemicarchive.archive.forms import UploadNetwork, EditNetwork, SearchNetworks
 from epydemicarchive.archive.models import Network, Tag
+from epydemicarchive.archive.queries import QueryNetworks
 from epydemicarchive.metadata.analyser import Analyser
 
 logger = logging.getLogger(__name__)
@@ -117,7 +119,7 @@ def edit(id):
                     # copy in new data
                     n.title = escape(form.title.data)
                     n.description = escape(form.description.data)
-                    ntags = Tag.ensure_tags(form.tags.data)
+                    n.tags = Tag.ensure_tags(form.tags.data)
 
                     db.session.commit()
 
@@ -132,3 +134,53 @@ def edit(id):
         return redirect(url_for('.browse'))
 
     return render_template('edit.tmpl', title='Edit network', network=n, form=form)
+
+
+@archive.route('/search', methods=['GET', 'POST'])
+def search():
+    '''Search the archive, using tags and metadata values to narrow the choice.'''
+    session['tags'] = []
+    session['metadata'] = []
+    return redirect(url_for('.refine'))
+
+
+@archive.route('/refine', methods=['GET', 'POST'])
+def refine():
+    '''Search the archive, using tags and metadata values to narrow the choice.'''
+    tags = session.get('tags', [])
+    metadata = session.get('metadata', [])
+
+    # restrict the networks according to the current constraints
+    qn = QueryNetworks(tags, metadata)
+    networks = qn.all()
+
+    # populate the form
+    form = SearchNetworks()
+    form.tags.data = qn.tags()
+    form.metadata.data = ', '.join(qn.terms())
+
+    if form.validate_on_submit():
+        if form.refine.data:
+            if form.add_tag.data:
+                # additional tags
+                print(form.add_tag.data)
+                session['tags'].append(form.add_tag.data)
+                print('new tags')
+                print(session['tags'])
+            elif form.add_meta_key:
+                # additional metadata
+                k = form.add_meta_key.data
+                v = form.add_meta_value.data
+                session['metadata'].append({'key': k,
+                                            'operator': 'equal',
+                                            'value': v})
+
+            return redirect(url_for('.refine'))
+
+        elif form.reset.data:
+            # reset the query
+            return redirect(url_for('.search'))
+
+    return render_template('search.tmpl', title='Search the archive',
+                           networks=networks,
+                           form=form)
