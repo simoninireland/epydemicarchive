@@ -25,7 +25,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_httpauth import HTTPTokenAuth
-from flask_sessionstore import Session
 from epydemicarchive.metadata import AnalyserChain
 
 
@@ -36,7 +35,6 @@ migrate = Migrate()
 login = LoginManager()
 login.login_view='auth.login'
 tokenauth = HTTPTokenAuth()
-sss = Session()
 analyser = AnalyserChain()
 
 
@@ -51,12 +49,6 @@ class Config:
 
     # Directory for storing networks
     ARCHIVE_DIR = os.environ.get('ARCHIVE_DIR') or tempfile.mkdtemp()
-
-    # Server-side sessions in the database
-    # sd: this might need to change to be less persistent
-    SESSION_TYPE = 'sqlalchemy'
-    SESSION_SQLALCHEMY_TABLE = 'sessions'
-    SESSION_SQLALCHEMY = db
 
 
 # Make sure the archive directory exists
@@ -82,7 +74,6 @@ def create(config=Config):
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
-    sss.init_app(app)
 
     # bind the metadata analyser
     analyser.init_app(app)
