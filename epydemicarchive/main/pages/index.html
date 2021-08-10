@@ -4,3 +4,30 @@
   This is the epydemic network archive, a repository of random (and
   other) networks for doing network science.
 </p>
+
+<p>
+  To download networks from the archive, you can either
+  <a href="{{ url_for('archive.browse') }}">browse the entire
+  collection</a> or <a href="{{ url_for('archive.search') }}">search
+  the archive</a> against tags or criteria such as size, degree
+  distribution, and so on. You can also <a href="{{
+  url_for('archive.upload') }}">submit</a> networks in a range of
+  common file formats. Accessing the archive is unrestricted; to
+  upload networks you need to <a href="{{ url_for('auth.register')
+  }}">register</a> and then <a href="{{ url_for('auth.login') }}">sign
+  in</a>.
+</p>
+
+<p>
+  However, this manual use of the archive is inconvenient for
+  large-scale use. An easier way is to access the archive
+  programmatically using its API. If your work makes use of the
+  epydemic simulation framework then the archive can be used
+  transparently as a source of networks for your simulations, and you
+  can also submit networks directly from programs.
+</p>
+
+<p>
+  Copyright &copy;
+  2021, <a href="mailto:simoninireland@gmail.com">Simon Dobson</a>.
+</p>
