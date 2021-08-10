@@ -105,6 +105,7 @@ def create(config=Config):
     app.register_error_handler(404, page_not_found)
 
     # custom Jinja2 filters
+    # See https://stackoverflow.com/questions/40132165/jinja2-render-template-inside-template
     @contextfilter
     def inner_render(context, value):
         return Template(value).render(context)
