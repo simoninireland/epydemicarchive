@@ -19,12 +19,14 @@
 
 import logging
 import json
+import random
 from flask import jsonify, url_for, send_file, request
 from werkzeug.http import HTTP_STATUS_CODES
 from markupsafe import escape
-from epydemicarchive import tokenauth, db
+from epydemicarchive import tokenauth, db, analyser
 from epydemicarchive.api.v1 import api, __version__
-from epydemicarchive.archive.models import Tag, Network
+from epydemicarchive.archive.models import Tag, Network, Metadata
+from epydemicarchive.archive.queries import QueryNetworks
 from epydemicarchive.auth.models import User
 from epydemicarchive.metadata.analyser import Analyser
 
@@ -130,21 +132,18 @@ def submit():
     email = user.email
 
     # retrieve the metadata for the submission
-    if 'meta' not in request.files:
-        error(400, 'No metadata supplied for submitted network')
-    submission = json.load(request.files['meta'])
+    submission = request.form
     filename = submission.get('filename')
     if filename is None:
-        error(400, 'No filename given for submitted network (can\'t determine file type)')
+        return error(400, 'No filename given for submitted network (can\'t determine file type)')
     title = escape(submission.get('title', ''))
     description = escape(submission.get('description', ''))
-    tags = map(escape, submission.get('tags', []))
+    tags = map(escape, submission.get('tags', '').split(','))
 
     # retieve raw network_filename
     if 'raw' not in request.files:
         return error(400, 'No submitted network')
     raw = request.files['raw']
-    print(filename)
 
     # create the network
     n = Network.create_network(user,
@@ -157,7 +156,7 @@ def submit():
 
     # extract metadata for the network
     # TODO: this should be asynchronous
-    Analyser.analyse(n)
+    analyser.analyse(n)
 
     db.session.commit()
     logging.info(f'Network {uuid} submitted by {email}')
@@ -167,4 +166,72 @@ def submit():
         '_version': __version__,
         'uuid': uuid
         }
+    return jsonify(res)
+
+
+@api.route('/retrieve', methods=['POST'])
+@tokenauth.login_required
+def retrieve():
+    '''Grab a network from the archive according to the given specification.
+    The specification can provide tags and metadata, as well as limiting the
+    pool of networks to choose from and excluding networks already used. It
+    returns the UUID of a network matching the criteria, which may then be
+    retrieved using the 'raw' endpoint.'''
+
+    # retrieve the query
+    if not request.is_json:
+        return error(400, 'Not a JSON query')
+    query = request.get_json()
+
+    # version check
+    v = query.get('_version', __version__)
+    if v != __version__:
+        return error(400, 'API version mismatch ({c} used against {s})'.format(c=v,
+                                                                               s=__version__))
+
+
+    # perform the query against the archive
+    qn = QueryNetworks(query.get('tags', []), query.get('metadata', []))
+    networks = list(qn.all())
+    if len(networks) == 0:
+        # no matching networks
+        res = {
+            '_version': __version__,
+            'message': 'No networks in the archive match the criteria'
+        }
+        return jsonify(res)
+    else:
+        # we need to make a random choice
+        # do any requested exclusions
+        exclude = query.get('exclude', None)
+        if exclude is not None:
+            # exclude any networks from the pool
+            ex = set(exclude)
+            networks = [n for n in networks if n.id not in ex]
+            if len(networks) == 0:
+                res = {
+                    '_version': __version__,
+                    'message': 'No unexcluded networks in the archive match the criteria'
+                }
+                return jsonify(res)
+
+        # check the size of the pool
+        pool = query.get('pool', 0)
+        if pool > 0 and len(networks) < pool:
+            # we don't have a large enough pool of
+            # matching networks to draw from
+            res = {
+                '_version': __version__,
+                'message': 'Insufficient pool of networks to draw from'
+                }
+            return jsonify(res)
+
+        # draw from the pool
+        n = random.choice(networks)
+
+    # return the chosen network's UUID
+    res = {
+        '_version': __version__,
+        'message': n.id
+    }
     return jsonify(res)
