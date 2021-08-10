@@ -4,7 +4,7 @@
 #
 # This file is part of epydemicarchive, a server for complex network archives.
 #
-# epydemicerchive is free software: you can redistribute it and/or modify
+# epydemicarchive is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
@@ -18,7 +18,6 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 import logging
-import json
 import random
 from flask import jsonify, url_for, send_file, request
 from werkzeug.http import HTTP_STATUS_CODES
