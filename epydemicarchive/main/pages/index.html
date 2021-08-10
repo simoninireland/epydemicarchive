@@ -5,6 +5,43 @@
   other) networks for doing network science.
 </p>
 
+<h2>Why does the archive exist?</h2>
+
+<p>
+  Network science uses random networks to test how processes behave
+  under different conditions, without constraining experiments to a
+  single network that might have specific features that affect the
+  process. This means that a typical experiment makes use of
+  a <i>lot</i> of networks: we might perform an experiment at 100
+  points in a parameter space and conduct 100 repetitions at each
+  point to get decent averaging. That would require 10,000 random
+  networks if we conducted each repetition on its own network; even if
+  we're more parsimonious we might still need several hundred networks
+  to ensure fairness.
+</p>
+
+<p>
+  This isn't a problem for small networks and for some topologies:
+  Erd&#337;s-R&eacute;nyi networks are cheap to construct, even for
+  large orders. But more complex topologies can become expensive to
+  generate, and this slows down experiments.
+<p>
+
+<p>
+  Wouldn't it be useful to be able to pre-create a library of networks
+  with different sizes and topologies, and then re-use them from
+  simulations? We could then separate the time spent generating
+  networks from the time spent using them for experiments. Of course
+  we'd have to be careful that we had enough networks to choose from,
+  and that we didn't spoil out statistics by accidentally using too
+  few different networks.
+</p>
+
+<p>
+  The epydemic archive performs this task.
+</p>
+
+<h2>How do I use the archive?</h2>
 <p>
   To download networks from the archive, you can either
   <a href="{{ url_for('archive.browse') }}">browse the entire
@@ -25,9 +62,4 @@
   epydemic simulation framework then the archive can be used
   transparently as a source of networks for your simulations, and you
   can also submit networks directly from programs.
-</p>
-
-<p>
-  Copyright &copy;
-  2021, <a href="mailto:simoninireland@gmail.com">Simon Dobson</a>.
 </p>
