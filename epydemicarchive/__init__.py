@@ -45,7 +45,7 @@ class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or os.urandom(32)
 
     # Database connection and tweaks
-    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///' + tempfile.mkstemp(suffix='.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URI') or 'sqlite:///:memory:'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # Directory for storing networks
