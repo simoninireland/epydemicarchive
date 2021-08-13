@@ -35,10 +35,22 @@ class Network(db.Model):
     '''Network data model. This records the metadata about a network held
     in the archive.
     '''
+
+    # The file types of networks we recognise, with their names
+    # and fuloader functions
+    FILETYPES = {
+        'al': ('adjacency list', networkx.read_adjlist),
+    }
+
+    # The file types of compressions we recognise
+    COMPRESSIONS = [ 'gz', 'bz2']
+
     # The regexp for all the acceptable extensions for network files
+    # sd: should be constructed from the above
     NetworkFileExtensions = re.compile(r'.+?\.(al.gz)$')
 
     # The regexp to extract the file's type (extension)
+    # sd: should be constructed from the above
     NetworkFileType = re.compile(r'.+?\.([a-zA-Z0-9]+)(\.((gz)|(bz2)))?$')
 
     # Location information
@@ -85,9 +97,10 @@ class Network(db.Model):
         t = m[1]
 
         # read network
-        if t == 'al':
-            # adjacency list
-            g = networkx.read_adjlist(filename)
+        if t in self.FILETYPES:
+            # use the loader function to load the network
+            (_, loader) = self.FILETYPES[t]
+            g = loader(filename)
         else:
             # unknown type
             raise Exception(f'Unknown network file type {t}')
