@@ -23,7 +23,7 @@ from unittest import makeSuite, TextTestRunner
 from networkx import fast_gnp_random_graph, write_adjlist
 from flask_unittest import LiveTestCase, LiveTestSuite
 from epydemicarchive import create, Config, db
-from epydemicarchive.api.v1.client import Archive, ClientException
+from epydemicarchive.api.v1.client import Archive
 from epydemicarchive.auth.models import User
 from epydemicarchive.archive.models import Network
 
@@ -57,7 +57,7 @@ class TestAPI(LiveTestCase):
     def testUnauthorised(self):
         '''Test we can't do unauthorised access.'''
         self._archive._headers = []
-        with self.assertRaises(ClientException):
+        with self.assertRaises(Exception):
             self._archive.tags()
 
     def testTags(self):
@@ -82,9 +82,20 @@ class TestAPI(LiveTestCase):
 
     def testRaw(self):
         '''Test we can get the same network back.'''
-        h = self._archive.raw(self.uuid)
-        self.assertEqual(self.g.order(), h.order())
+        gprime = self._archive.raw(self.uuid)
+        self.assertEqual(self.g.order(), gprime.order())
         # need more checks
+
+    def testSubmit(self):
+        '''Test we can submit and retrieve a network.'''
+        h = fast_gnp_random_graph(500, 0.02)
+        uuid = self._archive.submit(h, title='Another network', tags=['er'])
+        hprime = self._archive.raw(uuid)
+        self.assertEqual(h.order(), hprime.order())
+        info = self._archive.info(uuid)
+        self.assertEqual(info['title'], 'Another network')
+        self.assertEqual(info['description'], '')
+        self.assertCountEqual(info['tags'], ['er'])
 
 
 if __name__ == '__main__':
