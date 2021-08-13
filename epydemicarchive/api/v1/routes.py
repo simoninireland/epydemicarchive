@@ -85,7 +85,7 @@ def networks():
     return jsonify(res)
 
 
-@api.route('/network/meta/<id>', methods=['GET'])
+@api.route('/network/info/<id>', methods=['GET'])
 @tokenauth.login_required
 def network(id):
     '''Retrieve the metadata for the given network.
@@ -168,9 +168,9 @@ def submit():
     return jsonify(res)
 
 
-@api.route('/retrieve', methods=['POST'])
+@api.route('/search', methods=['POST'])
 @tokenauth.login_required
-def retrieve():
+def search():
     '''Grab a network from the archive according to the given specification.
     The specification can provide tags and metadata, as well as limiting the
     pool of networks to choose from and excluding networks already used. It
