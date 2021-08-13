@@ -74,9 +74,12 @@ SOURCES_METADATA_BLUEPRINT = \
 	epydemicarchive/metadata/topology.py \
 	epydemicarchive/metadata/degreedistribution.py \
 	epydemicarchive/metadata/er.py
-SOURCES_API_V1_BLUEPRINT =\
+SOURCES_API_V1_BLUEPRINT = \
 	epydemicarchive/api/v1/__init__.py \
 	epydemicarchive/api/v1/routes.py
+SOURCES_API_V1_CLIENT = \
+	epydemicarchive/api/v1/client/__init__.py \
+	epydemicarchive/api/v1/client/client.py
 SOURCES_CODE = \
 	$(SOURCES_LIBRARY) \
 	$(SOURCES_MIGRATIONS) \
@@ -86,7 +89,8 @@ SOURCES_CODE = \
 	$(SOURCES_USER_BLUEPRINT) \
 	$(SOURCES_ARCHIVE_BLUEPRINT) \
 	$(SOURCES_METADATA_BLUEPRINT) \
-	$(SOURCES_API_V1_BLUEPRINT)
+	$(SOURCES_API_V1_BLUEPRINT) \
+	$(SOURCES_API_V1_CLIENT)
 SOURCES_TESTS = \
 	test/app.py
 TESTSUITE = test
@@ -216,6 +220,10 @@ sdist: $(DIST_SDIST)
 # Build a wheel distribution
 wheel: $(DIST_WHEEL)
 
+# Build and upload the client-side API
+client: $(SOURCES_API_V1_CLIENT)
+	$(CHDIR) client && make sdist wheel VERSION=$(VERSION)
+
 # Upload a source distribution to PyPi
 upload: commit sdist wheel
 	$(GPG) --detach-sign -a dist/$(PACKAGENAME)-$(VERSION).tar.gz
@@ -241,7 +249,7 @@ docker-live:
 
 # Clean up the distribution build
 clean:
-	$(RM) $(SOURCES_GENERATED) $(SOURCES_DIST_DIR) epydemic.egg-info dist $(SOURCES_DOC_BUILD_DIR) $(SOURCES_DOC_ZIP) dist build
+	$(RM) $(SOURCES_GENERATED) $(SOURCES_DIST_DIR) $(PACKAGENAME).egg-info dist $(SOURCES_DOC_BUILD_DIR) $(SOURCES_DOC_ZIP) dist build
 
 # Clean up everything, including the computational environment (which is expensive to rebuild)
 reallyclean: clean
@@ -279,6 +287,7 @@ Available targets:
    make sdist        create a source distribution
    make wheel	     create binary (wheel) distribution
    make upload       upload distribution to PyPi
+   make client       upload the client-side API as epydemicarchive_client
    make commit       tag current version and and push to master repo
    make docker-image build a Docker image
    make docker-live  run a test server in a Docker container
