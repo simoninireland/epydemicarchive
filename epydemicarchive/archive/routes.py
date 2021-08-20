@@ -84,7 +84,7 @@ def edit(id):
     # populate the form
     form = EditNetwork(data=dict(title=n.title,
                                  description=n.description,
-                                 tags=', '.join(n.tagnames())))
+                                 tags=n.tagnames()))
 
     if form.validate_on_submit():
         # the first two commands are always available
