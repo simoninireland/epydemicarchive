@@ -1,4 +1,4 @@
-# API tests
+# API tests, excluding search
 #
 # Copyright (C) 2021 Simon Dobson
 #
@@ -22,7 +22,7 @@ from tempfile import NamedTemporaryFile, mkdtemp
 from unittest import makeSuite, TextTestRunner
 from networkx import fast_gnp_random_graph, write_adjlist
 from flask_unittest import LiveTestCase, LiveTestSuite
-from epydemicarchive import create, Config, db
+from epydemicarchive import create, Config, db, analyser
 from epydemicarchive.api.v1.client import Archive
 from epydemicarchive.auth.models import User
 from epydemicarchive.archive.models import Network
@@ -97,6 +97,14 @@ class TestAPI(LiveTestCase):
         self.assertEqual(info['description'], '')
         self.assertCountEqual(info['tags'], ['er'])
 
+    def testInfo(self):
+        '''Test we get adequate metadata.'''
+        info = self._archive.info(TestAPI.uuid)
+        self.assertIn('metadata', info)
+        kv = info['metadata']
+        self.assertIn('N', kv)
+        self.assertEqual(int(kv['N']), TestAPI.g.order())
+
 
 if __name__ == '__main__':
     # configure for transient in-memory database and archive
@@ -105,6 +113,7 @@ if __name__ == '__main__':
     Config.HOST = 'localhost'
     Config.PORT = 5050
     app = create(Config)
+    TestAPI._app = app
 
     # set up a simple test database
     with app.app_context():
@@ -115,13 +124,12 @@ if __name__ == '__main__':
         u = User.create_user('test@test.com', 'xxx')
         TestAPI.email = u.email
         TestAPI.api_key = u.api_key
-        db.session.add(u)
 
         # add a network
         filename = None
         try:
             # create a temporary file to take the graph
-            with NamedTemporaryFile(suffix='.al', delete=False) as tf:
+            with NamedTemporaryFile(suffix='.al.gz', delete=False) as tf:
                 filename = tf.name
 
             # create the network
@@ -136,7 +144,7 @@ if __name__ == '__main__':
                                        'A network',
                                        ['test', 'er'])
             TestAPI.uuid = n.id
-            db.session.add(n)
+            analyser.analyse(n)
         finally:
             if filename is not None:
                 os.remove(filename)

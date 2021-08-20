@@ -48,6 +48,7 @@ def error(status, message=None):
     }
     if message:
         payload['message'] = message
+    logger.error(message)
     res = jsonify(payload)
     res.status_code = status
     return res
@@ -123,7 +124,7 @@ def raw(id):
     return send_file(n.network_filename())
 
 
-@api.route('/network/submit', methods=['POST'])
+@api.route('/submit', methods=['POST'])
 @tokenauth.login_required
 def submit():
     '''Submit a network to the archive.'''
@@ -171,11 +172,14 @@ def submit():
 @api.route('/search', methods=['POST'])
 @tokenauth.login_required
 def search():
-    '''Grab a network from the archive according to the given specification.
-    The specification can provide tags and metadata, as well as limiting the
-    pool of networks to choose from and excluding networks already used. It
-    returns the UUID of a network matching the criteria, which may then be
-    retrieved using the 'raw' endpoint.'''
+    '''Grab aone or more networks from the archive according to the given
+    specification.  The specification can provide tags and metadata,
+    as well as limiting the pool of networks to choose from and
+    excluding networks already used. It returns the UUID of a network(s)
+    matching the criteria, which may then be retrieved using the 'raw'
+    endpoint.
+
+    '''
 
     # retrieve the query
     if not request.is_json:
@@ -188,49 +192,51 @@ def search():
         return error(400, 'API version mismatch ({c} used against {s})'.format(c=v,
                                                                                s=__version__))
 
+    # determine how many networks we're looking for, with -1 signifiying all
+    n = query.get('n', -1)
 
     # perform the query against the archive
-    qn = QueryNetworks(query.get('tags', []), query.get('metadata', []))
+    tags = query.get('tags', [])
+    metadata = query.get('metadata', [])
+    qn = QueryNetworks(tags, metadata)
     networks = list(qn.all())
-    if len(networks) == 0:
-        # no matching networks
-        res = {
-            '_version': __version__,
-            'message': 'No networks in the archive match the criteria'
-        }
-        return jsonify(res)
-    else:
-        # we need to make a random choice
-        # do any requested exclusions
-        exclude = query.get('exclude', None)
-        if exclude is not None:
-            # exclude any networks from the pool
-            ex = set(exclude)
-            networks = [n for n in networks if n.id not in ex]
-            if len(networks) == 0:
-                res = {
-                    '_version': __version__,
-                    'message': 'No unexcluded networks in the archive match the criteria'
-                }
-                return jsonify(res)
 
+    # do any requested exclusions
+    exclude = query.get('exclude', None)
+    if exclude is not None:
+        # exclude any networks from the pool
+        ex = set(exclude)
+        networks = [n for n in networks if n.id not in ex]
+
+    # return the networks
+    if n > 0:
+        # we need to make a random choice
         # check the size of the pool
-        pool = query.get('pool', 0)
+        pool = query.get('pool', n)
+        if pool < n:
+            # need a pool at least as large as the set of networks
+            # we want to draw
+            res = {
+                '_version': __version__,
+                'message': f'Need a pool of at least {n} from which to draw {n} networks'
+            }
+            return jsonify(res)
         if pool > 0 and len(networks) < pool:
             # we don't have a large enough pool of
             # matching networks to draw from
             res = {
                 '_version': __version__,
                 'message': 'Insufficient pool of networks to draw from'
-                }
+            }
             return jsonify(res)
 
         # draw from the pool
-        n = random.choice(networks)
+        networks = random.sample(networks, k=n)
 
     # return the chosen network's UUID
+    # TODO: add links to raw and info endpoints
     res = {
         '_version': __version__,
-        'message': n.id
+        'uuids': [n.id for n in networks],
     }
     return jsonify(res)

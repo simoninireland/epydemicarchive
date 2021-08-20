@@ -18,14 +18,13 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 import os
-import re
 from tempfile import NamedTemporaryFile
 from copy import copy
 from urllib.parse import urljoin
+import json
 import requests
-from requests import RequestException
 from requests_toolbelt import MultipartEncoder
-from networkx import Graph, write_adjlist, read_adjlist
+from networkx import write_adjlist, read_adjlist
 
 
 class Archive:
@@ -166,7 +165,7 @@ class Archive:
             headers['Content-type'] = encoder.content_type
 
             # make the request
-            url = self.endpoint('/network/submit')
+            url = self.endpoint('/submit')
             r = requests.post(url,
                               headers=headers,
                               data=encoder)
@@ -178,3 +177,53 @@ class Archive:
         finally:
             if filename is not None:
                 os.remove(filename)
+
+    def search(self, tags=[], metadata=[], exclude=None, n=None, pool=None):
+        '''Search the archive for a number of networks matching the given
+        criteria. The size of pool from which to draw can be set to ensure
+        enough randomness; networks previously used can be excluded from any
+        selection to prevent re-use.
+
+        Metadata constraints take the form of a list of triples where
+        each triple is of the form:
+
+        (<variable>, <operator>, <value>)
+
+        where <operator> is one of ==, !=, <, <=, >, >=.
+
+        :param tags: (optional) the tags that must be present (defaults to none)
+        :param metadata: (optional) metadata constraints (defaults to none)
+        :param exclude: (optional) list of network UUIDs to exclude
+        :param n: (optional) number of networks to retrieve (defaults to all)
+        :param pool: (optional) minimum pool of networks to draw from'''
+
+        # build the query
+        query = {
+            'tags': tags,
+            }
+        if n is not None:
+            query['n'] = n
+        if metadata is not None:
+            query['metadata'] = [
+                {
+                    'key': kv[0],
+                    'operator': kv[1],
+                    'value': kv[2]
+                } for kv in metadata]
+        if exclude is not None:
+            query['exclude'] = exclude
+        if pool is not None:
+            query['pool'] = pool
+
+        # make the request
+        url = self.endpoint('/search')
+        headers = copy(self._headers)
+        headers['Content-type'] = 'application/json'
+        r = requests.post(url,
+                          headers=headers,
+                          data=json.dumps(query))
+        r.raise_for_status()
+
+        # return the UUIDs of the drawn networks
+        rc = r.json()
+        return rc.get('uuids', [])

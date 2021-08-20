@@ -23,16 +23,6 @@ from epydemicarchive.archive.models import Network, Tag, Metadata
 
 class QueryNetworks:
 
-    OperatorStrings = {
-        'equal': '==',
-        'notequal': '!=',
-        'lessthan': '<',
-        'lessthanorequal': '<=',
-        'greaterthan': '>',
-        'greaterthanorequal': '>=',
-        'between': '<=>',
-    }
-
     def __init__(self, tags, terms):
         self._tags = tags
         self._terms = terms
@@ -61,36 +51,29 @@ class QueryNetworks:
         return self._tags
 
     def terms(self):
-        ts = []
-        for term in self._terms:
-            op = term['operator']
-            if op != 'between':
-                v = term['value']
-            else:
-                v = '[{l}, {h}]'.format(l=term['low'],
-                                        h=term['high'])
-            ts.append('{k} {op} {v}'.format(k=term['key'],
-                                            op=self.OperatorStrings[op],
-                                            v=v))
-        return ts
+        return self._terms
+
+    def termstrings(self):
+        return list(map(lambda t: '{k} {op} {v}'.format(k=t['key'],
+                                                        op=t['operator'],
+                                                        v=t['value']),
+                        self._terms))
 
     def filter(self, term):
         op = term['operator']
         f = None
-        if op == 'equal':
+        if op == '==':
             f = self.query_equal
-        elif op == 'notequal':
+        elif op == '!=':
             f = self.query_notequal
-        elif op == 'lessthan':
+        elif op == '<':
             f = self.query_lessthan
-        elif op == 'lessthanorequal':
+        elif op == '<=':
             f = self.query_lessthanorequal
-        elif op == 'greaterthan':
+        elif op == '>':
             f = self.query_greaterthan
-        elif op == 'greaterthanorequal':
+        elif op == '>=':
             f = self.query_greaterthanorequal
-        elif op == 'between':
-            f = self.query_between
 
         return f(term)
 
@@ -128,11 +111,4 @@ class QueryNetworks:
         def f(q):
             return q.filter(Metadata.key == term['key'],
                             Metadata.value >= term['value'])
-        return f
-
-    def query_between(self, term):
-        def f(q):
-            return q.filter(Metadata.key == term['key'],
-                            Metadata.value >= term['low'],
-                            Metadata.value <= term['high'])
         return f

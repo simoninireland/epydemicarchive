@@ -137,7 +137,7 @@ def edit(id):
 
 @archive.route('/search', methods=['GET', 'POST'])
 def search():
-    '''Search the archive, using tags and metadata values to narrow the choice.'''
+    '''Search the archive.'''
     session['tags'] = []
     session['metadata'] = []
     return redirect(url_for('.refine'))
@@ -156,28 +156,30 @@ def refine():
     # populate the form
     form = SearchNetworks()
     form.tags.data = qn.tags()
-    form.metadata.data = ', '.join(qn.terms())
+    form.metadata.data = ', '.join(qn.termstrings())
 
     if form.validate_on_submit():
         if form.refine.data:
             if form.add_tag.data:
                 # additional tags
-                print(form.add_tag.data)
-                session['tags'].append(form.add_tag.data)
-                print('new tags')
-                print(session['tags'])
+                # sd: can't directly append to the list in the session object
+                tags.append(form.add_tag.data)
+                session['tags'] = tags
             elif form.add_meta_key:
                 # additional metadata
+                # sd: can't directly append to the list in the session object
                 k = form.add_meta_key.data
                 v = form.add_meta_value.data
-                session['metadata'].append({'key': k,
-                                            'operator': 'equal',
-                                            'value': v})
+                metadata.append({'key': k,
+                                 'operator': '==',
+                                 'value': v})
+                session['metadata'] = metadata
 
             return redirect(url_for('.refine'))
 
         elif form.reset.data:
             # reset the query
+            print('reset')
             return redirect(url_for('.search'))
 
     return render_template('search.tmpl', title='Search the archive',
