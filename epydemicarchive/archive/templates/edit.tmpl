@@ -4,39 +4,67 @@
   <h1>Network {{ network.id }}</h1>
 
   <p>
-    Uploaded by {{ network.owner.email }} at {{ network.uploaded.isoformat(timespec='seconds') + 'Z' }}
+    <div class="alert alert-info" style="width: 45em;">
+      Uploaded by {{ network.owner.email }} at {{
+      network.uploaded.isoformat(timespec='seconds') + 'Z' }}
+    </div>
   </p>
 
   {% with is_owner = (current_user.email == network.owner.email) %}
     <form action="" method="post" novalidate>
       {{ form.hidden_tag() }}
       <p>
-	{{ form.title.label }}<br>
-	{% if is_owner %}
-	  {{ form.title(size=32) }}
-	{% else %}
-	  {{ form.title(size=32, readonly="readonly") }}
-	{% endif %}
+	{{ form.title.label }}
+	<div class="input-group">
+	  <span class="input-group-addon" id="basic-addon1">
+	    <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+	  </span>
+	  {% if is_owner %}
+	    {{ form.title(size=45) }}
+	  {% else %}
+	    {{ form.title(size=45, readonly="readonly") }}
+	  {% endif %}
+	</div>
       </p>
       <p>
-	{{ form.description.label }}<br>
-	{% if is_owner %}
-	  {{ form.description(size=128) }}
-	{% else %}
-	  {{ form.description(size=128, readonly="readonly") }}
-	{% endif %}
+	{{ form.description.label }}
+	<div class="input-group">
+	  <span class="input-group-addon" id="basic-addon1">
+	    <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+	  </span>
+	  {% if is_owner %}
+	    {{ form.description(rows="8", cols="48") }}
+	  {% else %}
+	    {{ form.description(rows="8", cols="48", readonly="readonly") }}
+	  {% endif %}
+	</div>
       </p>
       <p>
-	{{ form.tags.label }}<br>
-	{% if is_owner %}
-	  {{ form.tags(size=32) }}
-	{% else %}
-	  {{ form.tags(size=32, readonly="readonly") }}
-	{% endif %}
-	<br>
-	{% for m in network.metadata %}
-	  {{ m.key }} =  {{ m.value }} <br>
-	{% endfor %}
+	{{ form.tags.label }}
+	<div class="input-group">
+	  <span class="input-group-addon" id="basic-addon1">
+	    <span class="glyphicon glyphicon-tags" aria-hidden="true"></span>
+	  </span>
+	  {% if is_owner %}
+	    {{ form.tags(size=32) }}
+	  {% else %}
+	    {{ form.tags(size=32, readonly="readonly") }}
+	  {% endif %}
+	</div>
+      </p>
+      <p>
+	<div class="panel panel-info" style="width: 45em;">
+	  <div class="panel-heading">
+	    <label for="metadata">Metadata</label>
+	  </div>
+	  <div class="panel-body">
+	    <div>
+	      {% for m in network.metadata %}
+		{{ m.key }} =  {{ m.value }}<br>
+	      {% endfor %}
+	    </div>
+	  </div>
+	</div>
       </p>
       <p>
 	{% if is_owner %}

@@ -7,14 +7,22 @@
     {{ form.hidden_tag() }}
     <p>
       {{ form.email.label }}<br>
-      {{ form.email(size=32) }}<br>
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">@</span>
+	{{ form.email(size=48) }}
+      </div>
       {% for error in form.email.errors %}
 	<span style="color: red;">[{{ error }}]</span>
       {% endfor %}
     </p>
     <p>
-      {{ form.password.label }}<br>
-      {{ form.password(size=32) }}<br>
+      {{ form.password.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-asterisk" aria-hidden="true"></span>
+	</span>
+	{{ form.password(size=48) }}
+      </div>
       {% for error in form.password.errors %}
 	<span style="color: red;">[{{ error }}]</span>
       {% endfor %}

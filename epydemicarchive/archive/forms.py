@@ -21,7 +21,7 @@ from flask_wtf import FlaskForm
 from wtforms import Field, StringField, TextAreaField, SubmitField, SelectMultipleField, FormField, FieldList
 from flask_wtf.file import FileField
 from wtforms.validators import DataRequired, EqualTo, Email, ValidationError
-from wtforms.widgets import TextInput
+from wtforms.widgets import TextInput, TextArea
 from epydemicarchive.archive.models import Network
 
 
@@ -66,7 +66,7 @@ class UploadNetwork(FlaskForm):
 
     file = FileField('Network filename')
     title = StringField('Title (optional)')
-    description = TextAreaField('Description (optional)')
+    description = TextAreaField('Description (optional)', widget=TextArea())
     tags = TagField('Tags')
     submit = SubmitField('Upload')
 
@@ -82,7 +82,7 @@ class UploadNetwork(FlaskForm):
 class EditNetwork(FlaskForm):
 
     title = StringField('Title (optional)')
-    description = TextAreaField('Description (optional)')
+    description = TextAreaField('Description (optional)', widget=TextArea())
     tags = TagField('Tags')
     submit = SubmitField('Update')
     cancel = SubmitField('Cancel')

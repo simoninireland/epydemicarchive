@@ -1,28 +1,112 @@
 {% extends 'base.tmpl' %}
 
+{% block head %}
+  {{ super() }}
+  <link rel="stylesheet" href="{{ url_for('static', filename='js/jquery-file-upload/css/jquery.fileupload.css') }}">
+  {%  block scripts %}
+    {{ super() }}
+
+    <script src="//blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/vendor/jquery.ui.widget.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/javascript-templates/tmpl.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/jquery.iframe-transport.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/jquery.fileupload.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/jquery.fileupload-process.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/jquery.fileupload-image.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/jquery.fileupload-validate.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/jquery-file-upload/js/jquery.fileupload-ui.js') }}"></script>
+
+    <script>
+      $(function () {
+	 {# Get your upload form by ID #}
+	 $('#network_upload').fileupload({
+	    url: "{{ url_for('.upload') }}",
+	    downloadTemplateId: null {# if null by default search script with id='template-upload' #}
+	 });
+      });
+    </script>
+
+	    <script id="template-upload" type="text/x-tmpl">
+	    {% raw %}
+	    {% for (var i=0, file; file=o.files[i]; i++) { %}
+		<tr class="template-upload fade" >
+		    <td>
+			<span class="preview"></span>
+		    </td>
+		    <td style="max-width: 20%">
+			<p class="name">{%=file.name%}</p>
+			<strong class="error text-danger"></strong>
+		    </td>
+		    <td>
+			<p class="size">Processing</p>
+			<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+		    </td>
+		    <td>
+			{% if (!i && !o.options.autoUpload) { %}
+			    <button class="btn btn-primary start" disabled>
+				<i class="glyphicon glyphicon-upload"></i>
+				<span>Send</span>
+			    </button>
+			{% } %}
+			{% if (!i) { %}
+			    <button class="btn btn-warning cancel">
+				<i class="glyphicon glyphicon-ban-circle"></i>
+				<span>Cancel</span>
+			    </button>
+			{% } %}
+		    </td>
+		</tr>
+	    {% } %}
+	    {% endraw %}
+	</script>
+
+  {% endblock %}
+{% endblock %}
+
 {% block app_content %}
   <h1>Upload network file</h1>
 
   <form action="" method="post" novalidate enctype="multipart/form-data">
     {{ form.hidden_tag() }}
     <p>
-      {{ form.file.label }}<br>
-      {{ form.file(size=32) }}<br>
+      {{ form.file.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-upload" aria-hidden="true"></span>
+	</span>
+	{{ form.file(size=48) }}
+      </div>
       {% for error in form.file.errors %}
 	<span style="color: red;">[{{ error }}]</span>
       {% endfor %}
     </p>
     <p>
-      {{ form.title.label }}<br>
-      {{ form.title(size=32) }}<br>
+      {{ form.title.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-file" aria-hidden="true"></span>
+	</span>
+	{{ form.title(size=45) }}
+      </div>
     </p>
     <p>
-      {{ form.description.label }}<br>
-      {{ form.description(size=128) }}<br>
+      {{ form.description.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
+	</span>
+	{{ form.description(rows="8", cols="48") }}
+      </div>
     </p>
     <p>
-      {{ form.tags.label }}<br>
-      {{ form.tags(size=32) }}<br>
+      {{ form.tags.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-tags" aria-hidden="true"></span>
+	</span>
+	{{ form.tags(size=32) }}
+	</div>
     </p>
     <p>{{ form.submit() }}</p>
   </form>

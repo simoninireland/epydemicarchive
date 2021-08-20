@@ -28,14 +28,14 @@ class Login(FlaskForm):
     email = StringField('Email address', validators=[DataRequired()])
     password = StringField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember me')
-    submit = SubmitField('Register me')
+    submit = SubmitField('Sign in')
 
 
 class Register(FlaskForm):
     email = StringField('Email address', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     retype_password = PasswordField('Retype password', validators=[DataRequired(), EqualTo('password')])
-    submit = SubmitField('Sign in')
+    submit = SubmitField('Register')
 
     def validate_email(self, field):
         '''Make sure user doesn't already exist.

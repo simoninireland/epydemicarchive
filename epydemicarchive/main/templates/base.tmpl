@@ -87,9 +87,10 @@
     {% endwith %}
 
     {# application content needs to be provided in the app_content block #}
-    {% block app_content %}{% endblock %}
+    <div class="well">
+      {% block app_content %}{% endblock %}
+    </div>
 
-    <hr>
     <p>
       Copyright &copy;
       2021, <a href="mailto:simoninireland@gmail.com">Simon Dobson</a>.
