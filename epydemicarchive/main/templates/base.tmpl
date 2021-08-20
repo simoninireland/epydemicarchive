@@ -45,10 +45,10 @@
 	       role="button" aria-haspopup="true"
 	       aria-expanded="false">
 	       {% if current_user.is_authenticated %}
-		 <span style="color: green;" class="glyphicon glyphicon-home"></span>
+		 <span style="color: green;" class="glyphicon glyphicon-user"></span>
 		 <span style="color: green">{{ current_user.email }}</span>
 	       {% else %}
-		 <span class="glyphicon glyphicon-home"></span>
+		 <span class="glyphicon glyphicon-user"></span>
 	       {% endif %}
 	       <span class="caret"></span>
 	    </a>
