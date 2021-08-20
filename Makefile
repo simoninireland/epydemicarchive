@@ -148,6 +148,9 @@ RM = rm -fr
 CP = cp
 CHDIR = cd
 ZIP = zip -r
+MKDIR = mkdir -p
+WGET = wget
+UNZIP = bsdtar -xvf-
 
 # Files that are locally changed vs the remote repo
 # (See https://unix.stackexchange.com/questions/155046/determine-if-git-working-directory-is-clean-from-a-script)
@@ -205,7 +208,8 @@ coverage: env
 doc: env $(SOURCES_DOCUMENTATION) $(SOURCES_DOC_CONF)
 	$(ACTIVATE) && $(CHDIR) doc && $(RUN_SPHINX_HTML)
 
-# Build a development venv from the requirements in the repo
+# Build a development venv from the requirements in the repo, including
+# any JavaScript plugins
 .PHONY: env
 env: $(VENV)
 
@@ -253,7 +257,7 @@ clean:
 
 # Clean up everything, including the computational environment (which is expensive to rebuild)
 reallyclean: clean
-	$(RM) $(VENV)
+	$(RM) $(VENV) $(ARCHIVE_JS_PLUGIN_DIR)
 
 
 # ----- Generated files -----

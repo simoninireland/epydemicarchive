@@ -6,24 +6,27 @@
 
 *** Release 0.2.1
 
-**** Coding
+**** Coding [0/8]
 
      - [ ] [[https://pythonhosted.org/Flask-Principal/][RBAC]]
      - [ ] [[https://flask-limiter.readthedocs.io/en/stable/][Rate limits]]
      - [ ] [[https://flask-email.readthedocs.io/en/latest/][Email notifications]] and callbacks
      - [ ] Simple admin interface
-
+     - [ ] Inference of network topology for BA and PLC networks
+     - [ ] Background processing of metadata (use [[https://docs.celeryproject.org/en/stable/getting-started/introduction.html][celery]]? -- for which
+       there is a [[https://flask.palletsprojects.com/en/2.0.x/patterns/celery/][Flask pattern]])
+     - [ ] Vagrant box description
+     - [ ] File upload progress
 
 *** Release 0.1.1
 
-**** Coding [2/6]
+**** Coding [5/5]
 
-     - [ ] Initial generation
-     - [ ] Initial API
+     - [X] Initial API
      - [X] Initial architecture
-     - [ ] Public key checks
+     - [X] Public key checks
      - [X] Database schema
-     - [ ] Metadata generation
+     - [X] Metadata generation
 
 
 ** Architecture
