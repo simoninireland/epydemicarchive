@@ -5,8 +5,12 @@
 
   <p>
     <div class="alert alert-info" style="width: 45em;">
-      Uploaded by {{ network.owner.email }} at {{
-      network.uploaded.isoformat(timespec='seconds') + 'Z' }}
+      Uploaded by
+      <a href="{{ url_for('user.profile', email=network.owner.email) }}"
+	 class="alert-link">
+	{{ network.owner.email }}
+      </a>
+      at {{ network.uploaded.isoformat(timespec='seconds') + 'Z' }}
     </div>
   </p>
 
