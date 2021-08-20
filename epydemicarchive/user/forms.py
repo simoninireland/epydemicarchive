@@ -19,6 +19,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.widgets import TextArea
 
 
 class EditProfile(FlaskForm):
@@ -26,7 +27,7 @@ class EditProfile(FlaskForm):
     name = StringField('Name (optional)')
     affiliation = StringField('University or affiliation (optional)')
     url = StringField('Home page (optional)')
-    bio = TextAreaField('(Biography (optional)')
+    bio = TextAreaField('(Biography (optional)', widget=TextArea())
     submit = SubmitField()
     cancel = SubmitField()
     api_key = SubmitField('Request a new API key')
