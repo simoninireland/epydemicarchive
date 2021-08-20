@@ -21,7 +21,7 @@
 PACKAGENAME = epydemicarchive
 
 # The version we're building
-VERSION = 0.1.1
+VERSION = 0.2.1
 
 
 # ----- Sources -----
@@ -92,8 +92,9 @@ SOURCES_CODE = \
 	$(SOURCES_API_V1_BLUEPRINT) \
 	$(SOURCES_API_V1_CLIENT)
 SOURCES_TESTS = \
-	test/app.py
-TESTSUITE = test
+	test/app.py \
+	test/test_api.py \
+	test/test_search_api.py
 FLASK_TEST_APP_INSTANCE = test.app:app
 
 SOURCES_DOC_CONF = doc/conf.py
@@ -170,8 +171,6 @@ PY_REQUIREMENTS = $(shell $(SED) -e '/^typing_extensions/d' -e 's/^\(.*\)/"\1",/
 
 # Constructed commands
 RUN_FLASK = FLASK_APP=$(FLASK_TEST_APP_INSTANCE) FLASK_ENV=development $(FLASK) run
-RUN_TESTS = $(TOX)
-RUN_COVERAGE = $(COVERAGE) erase && $(COVERAGE) run -a setup.py test && $(COVERAGE) report -m --include '$(PACKAGENAME)*'
 RUN_SETUP = $(PYTHON) setup.py
 RUN_SPHINX_HTML = PYTHONPATH=$(ROOT) make html
 RUN_TWINE = $(TWINE) upload dist/*
@@ -195,13 +194,9 @@ newlive:
 	$(ACTIVATE) && FLASK_APP=$(FLASK_TEST_APP_INSTANCE) $(FLASK) db upgrade
 	make live
 
-# Run tests for all versions of Python we're interested in
+# Run tests
 test: env Makefile setup.py
-	$(ACTIVATE) && $(RUN_TESTS)
-
-# Run coverage checks over the test suite
-coverage: env
-	$(ACTIVATE) && $(RUN_COVERAGE)
+	for s in $(SOURCES_TESTS); do $(ACTIVATE) && PYTHONPATH=. $(PYTHON) $$s; done
 
 # Build the API documentation using Sphinx
 .PHONY: doc
@@ -245,7 +240,7 @@ check-local-repo-clean:
 
 # Build a docker image
 docker-image: $(SOURCES_CODE) Makefile $(DOCKERFILE)
-	$(DOCKER) build -t $(DOCKER_IMAGE):latest .
+	$(DOCKER) build -t $(DOCKER_IMAGE):latest -t $(DOCKER_IMAGE):$(VERSION) .
 
 # Run the server live in a Docker container
 docker-live:
@@ -284,8 +279,7 @@ $(DIST_WHEEL): $(SOURCES_GENERATED) $(SOURCES_CODE) Makefile
 define HELP_MESSAGE
 Available targets:
    make live         run a test server (NOT FOR PRODUCTION)
-   make test         run the test suite for all Python versions we support
-   make coverage     run coverage checks of the test suite
+   make test         run the API test suite
    make doc          build the API documentation using Sphinx
    make env          create a development virtual environment
    make sdist        create a source distribution
