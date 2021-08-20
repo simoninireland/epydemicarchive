@@ -28,7 +28,7 @@ from epydemicarchive.user.models import Profile
 
 @user.route('/profile/<email>', methods=['GET', 'POST'])
 @login_required
-def edit_profile(email):
+def profile(email):
     '''The user profile editing page.'''
     u = User.from_email(email)
     if u is None:
