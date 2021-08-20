@@ -6,20 +6,40 @@
   <form action="" method="post" novalidate>
     {{ form.hidden_tag() }}
     <p>
-      {{ form.name.label }}<br>
-      {{ form.name(size=64) }}<br>
+      {{ form.name.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+	</span>
+	{{ form.name(size=64) }}
+	</div>
     </p>
     <p>
-      {{ form.affiliation.label }}<br>
-      {{ form.affiliation(size=64) }}<br>
+      {{ form.affiliation.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-home" aria-hidden="true"></span>
+	</span>
+	{{ form.affiliation(size=64) }}
+      </div>
     </p>
     <p>
-      {{ form.url.label }}<br>
-      {{ form.url(size=32) }}<br>
+      {{ form.url.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-link" aria-hidden="true"></span>
+	</span>
+	{{ form.url(size=32) }}
+	</div>
     </p>
     <p>
-      {{ form.bio.label }}<br>
-      {{ form.bio(size=128) }}<br>
+      {{ form.bio.label }}
+      <div class="input-group">
+	<span class="input-group-addon" id="basic-addon1">
+	  <span class="glyphicon glyphicon-paperclip" aria-hidden="true"></span>
+	</span>
+	{{ form.bio(rows="8", cols="48") }}
+	</div>
     </p>
     <p>
       {{ form.submit() }} &nbsp; {{ form.cancel() }}
