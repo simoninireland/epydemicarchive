@@ -18,7 +18,7 @@
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
 from flask import render_template, flash, redirect, url_for, request
-from flask_login import login_required
+from flask_login import login_required, current_user
 from epydemicarchive import db
 from epydemicarchive.auth.models import User
 from epydemicarchive.user import user
@@ -46,6 +46,10 @@ def profile(email):
         if form.cancel.data:
             # user cancelled editing
             flash('Profile edit cancelled', 'info')
+        elif current_user != u:
+            # attempt to edit someone else's profile
+            flash('Can\'t edit someone else\'s profile!', 'error')
+            return redirect(url_for('main.index'))
         elif form.api_key.data:
             # user requested a new API key
             u.revoke_api_key()
