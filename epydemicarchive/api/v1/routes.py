@@ -172,8 +172,8 @@ def submit():
 @api.route('/search', methods=['POST'])
 @tokenauth.login_required
 def search():
-    '''Grab aone or more networks from the archive according to the given
-    specification.  The specification can provide tags and metadata,
+    '''Grab one or more networks from the archive according to the given
+    specification. The specification can provide tags and metadata,
     as well as limiting the pool of networks to choose from and
     excluding networks already used. It returns the UUID of a network(s)
     matching the criteria, which may then be retrieved using the 'raw'
