@@ -42,11 +42,11 @@ class Archive:
     '''
 
     # Tuning parameters
-    CHUNKSIZE = 4096                        #: Chunk size for streaming networks from the archive.
+    CHUNKSIZE = 4096                       #: Chunk size for streaming networks from the archive.
     FILETYPE = '.al.gz'                    #: Default file type for submitted networks.
 
     # The base URI for the API
-    API = '/api/v1'             #: The file part of the API base URI.
+    API = '/api/v1'                        #: The file part of the API base URI.
 
     def __init__(self, uri=None, api_key=None):
         # store the API key
@@ -65,7 +65,20 @@ class Archive:
                 raise Exception('No SERVER_URI available')
         self._base_uri = urljoin(uri, self.API)
 
+    def base_uri(self):
+        '''Return the base URI used to access this archive. This is
+        a combination of the archive URI and the namespace for the
+        endpoints of the current version of the API.
+
+        :returns: the base URI'''
+        return self._base_uri
+
     def endpoint(self, meth, arg=None):
+        '''Return the URI associatedx with the given method.
+
+        :param meth: the method
+        :param arg: the argument (defaults to none)
+        :returns: a URI'''
         if arg is not None:
             meth = meth + '/' + arg
         m = urljoin(self._base_uri, self.API + meth)
