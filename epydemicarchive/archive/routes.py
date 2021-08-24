@@ -156,7 +156,7 @@ def refine():
     # populate the form
     form = SearchNetworks()
     form.tags.data = qn.tags()
-    form.metadata.data = ', '.join(qn.termstrings())
+    form.metadata.data = ', '.join(qn.constraintstrings())
 
     if form.validate_on_submit():
         if form.refine.data:
