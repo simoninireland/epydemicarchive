@@ -17,7 +17,7 @@
 # You should have received a copy of the GNU General Public License
 # along with epydemicarchive. If not, see <http://www.gnu.org/licenses/gpl.html>.
 
-from flask import render_template, flash, redirect, url_for, request
+from flask import render_template, flash, redirect, url_for
 from flask_login import login_required, current_user
 from epydemicarchive import db
 from epydemicarchive.auth.models import User
