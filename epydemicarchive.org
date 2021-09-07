@@ -4,9 +4,9 @@
 
 ** Release planning
 
-*** Release 0.2.1
+*** Release 0.3.1
 
-**** Coding [0/8]
+**** Coding [0/10]
 
      - [ ] [[https://pythonhosted.org/Flask-Principal/][RBAC]]
      - [ ] [[https://flask-limiter.readthedocs.io/en/stable/][Rate limits]]
@@ -16,9 +16,16 @@
      - [ ] Background processing of metadata (use [[https://docs.celeryproject.org/en/stable/getting-started/introduction.html][celery]]? -- for which
        there is a [[https://flask.palletsprojects.com/en/2.0.x/patterns/celery/][Flask pattern]])
      - [ ] Vagrant box description
-     - [ ] File upload progress
+     - [ ] File upload progress (see [[https://pythonise.com/articles/upload-progress-bar-xmlhttprequest][here]] for a solution)
+     - [ ] Change login and profile to use id rather than email address
+     - [ ] Security run-through to make sure all sensitive pages are
+       properly user-checked
 
-*** Release 0.1.1
+*** Release 0.2.1
+
+    Maintenance release to PyPy.
+
+*** Release 0.1.1                                                   :ARCHIVE:
 
 **** Coding [5/5]
 
