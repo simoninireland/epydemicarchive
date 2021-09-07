@@ -52,15 +52,12 @@ DIST_WHEEL = dist/$(PACKAGENAME)-$(VERSION)-py3-none-any.whl
 # Base commands
 PYTHON = python3
 FLASK = flask
-TOX = tox
-COVERAGE = coverage
 PIP = pip
 TWINE = twine
 GPG = gpg
 GIT = git
 VIRTUALENV = $(PYTHON) -m venv
 ACTIVATE = . $(VENV)/bin/activate
-DOCKER = docker
 TR = tr
 CAT = cat
 SED = sed
