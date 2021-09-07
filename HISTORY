@@ -1,5 +1,11 @@
-Release 0.1.1 2021-08-20
+Release 0.2.1 2021-09-07
 
+   - Removed the "between" query operator as unnecessary
+   - Change to using operator symbols, not names
+   - Added search to client API
+   - Fixed compound queries, generating better SQL
+
+Release 0.1.1 2021-08-20
 
    - Basic web app
    - Bootstrap 3 UI

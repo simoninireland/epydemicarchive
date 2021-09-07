@@ -24,7 +24,7 @@ from dotenv import load_dotenv
 from epydemicarchive import create
 
 # Load environment from .env
-load_dotenv()
+load_dotenv(dotenv_path='.env')
 
 # Set up logging
 logger = logging.getLogger(__name__)

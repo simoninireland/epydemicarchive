@@ -22,4 +22,4 @@ Author and license
 
 Copyright (c) 2021, Simon Dobson <simoninireland@gmail.com>
 
-Licensed under the `GNU General Public License v3 or later (GPLv3+) <http://www.gnu.org/licenses/gpl.html>`_.
+Licensed under the `GNU General Public License v3 or later <http://www.gnu.org/licenses/gpl.html>`_.

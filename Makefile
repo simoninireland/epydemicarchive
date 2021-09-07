@@ -28,7 +28,7 @@ VERSION = 0.2.1
 
 # Source code
 SOURCES_SETUP_IN = setup.py.in
-SOURCES_LIBRARY = \
+SOURCES_PACKAGE = \
 	epydemicarchive/__init__.py \
 	epydemicarchive/templates/404.tmpl
 SOURCES_MIGRATIONS = \
@@ -81,7 +81,7 @@ SOURCES_API_V1_CLIENT = \
 	epydemicarchive/api/v1/client/__init__.py \
 	epydemicarchive/api/v1/client/client.py
 SOURCES_CODE = \
-	$(SOURCES_LIBRARY) \
+	$(SOURCES_PACKAGE) \
 	$(SOURCES_MIGRATIONS) \
 	$(SOURCE_DB_MIGRATIONS) \
 	$(SOURCES_MAIN_BLUEPRINT) \
@@ -91,10 +91,12 @@ SOURCES_CODE = \
 	$(SOURCES_METADATA_BLUEPRINT) \
 	$(SOURCES_API_V1_BLUEPRINT) \
 	$(SOURCES_API_V1_CLIENT)
-SOURCES_TESTS = \
-	test/app.py \
+SOURCES_SERVER_TESTS =\
 	test/test_api.py \
 	test/test_search_api.py
+SOURCES_TESTS = \
+	test/app.py \
+	test/test_query.py
 FLASK_TEST_APP_INSTANCE = test.app:app
 
 SOURCES_DOC_CONF = doc/conf.py
@@ -133,7 +135,6 @@ DIST_WHEEL = dist/$(PACKAGENAME)-$(VERSION)-py3-none-any.whl
 # Base commands
 PYTHON = python3
 FLASK = flask
-TOX = tox
 COVERAGE = coverage
 PIP = pip
 TWINE = twine
@@ -172,6 +173,7 @@ PY_REQUIREMENTS = $(shell $(SED) -e '/^typing_extensions/d' -e 's/^\(.*\)/"\1",/
 # Constructed commands
 RUN_FLASK = FLASK_APP=$(FLASK_TEST_APP_INSTANCE) FLASK_ENV=development $(FLASK) run
 RUN_SETUP = $(PYTHON) setup.py
+RUN_TESTS = $(PYTHON) -m unittest discover -s test
 RUN_SPHINX_HTML = PYTHONPATH=$(ROOT) make html
 RUN_TWINE = $(TWINE) upload dist/*
 
@@ -196,15 +198,18 @@ newlive:
 
 # Run tests
 test: env Makefile setup.py
-	for s in $(SOURCES_TESTS); do $(ACTIVATE) && PYTHONPATH=. $(PYTHON) $$s; done
+	$(ACTIVATE) && $(RUN_TESTS)
+
+.PHONY: server-test
+server-test: env Makefile setup.py
+	for s in $(SOURCES_SERVER_TESTS); do $(ACTIVATE) && PYTHONPATH=. $(PYTHON) $$s; done
 
 # Build the API documentation using Sphinx
 .PHONY: doc
 doc: env $(SOURCES_DOCUMENTATION) $(SOURCES_DOC_CONF)
 	$(ACTIVATE) && $(CHDIR) doc && $(RUN_SPHINX_HTML)
 
-# Build a development venv from the requirements in the repo, including
-# any JavaScript plugins
+# Build a development venv from the requirements in the repo
 .PHONY: env
 env: $(VENV)
 
@@ -219,8 +224,8 @@ sdist: $(DIST_SDIST)
 # Build a wheel distribution
 wheel: $(DIST_WHEEL)
 
-# Build and upload the client-side API
-client: $(SOURCES_API_V1_CLIENT)
+# Build the client-side API
+client: commit
 	$(CHDIR) client && make sdist wheel VERSION=$(VERSION)
 
 # Upload a source distribution to PyPi
