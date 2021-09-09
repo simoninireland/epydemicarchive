@@ -22,8 +22,8 @@ from setuptools import setup
 with open('README.rst') as f:
     longDescription = f.read()
 
-setup(name='epydemicarchive-client',
-      version='',
+setup(name='epydemicarchive_client',
+      version='0.2.1',
       description='Client for the epydemic archive',
       long_description=longDescription,
       url='http://github.com/simoninireland/epydemicarchive',

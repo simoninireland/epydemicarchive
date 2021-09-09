@@ -22,7 +22,7 @@ from setuptools import setup
 with open('README.rst') as f:
     longDescription = f.read()
 
-setup(name='epydemicarchive-client',
+setup(name='epydemicarchive_client',
       version='VERSION',
       description='Client for the epydemic archive',
       long_description=longDescription,

@@ -21,6 +21,7 @@
 PACKAGENAME = epydemicarchive_client
 
 # The version we're building is inherited from parent build
+VERSION = $(VERSION)
 
 
 # ----- Sources -----

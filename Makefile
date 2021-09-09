@@ -225,8 +225,9 @@ sdist: $(DIST_SDIST)
 wheel: $(DIST_WHEEL)
 
 # Build the client-side API
-client: commit
-	$(CHDIR) client && make sdist wheel VERSION=$(VERSION)
+.PHONY: client
+client:
+	$(CHDIR) client && make upload VERSION=$(VERSION)
 
 # Upload a source distribution to PyPi
 upload: commit sdist wheel
